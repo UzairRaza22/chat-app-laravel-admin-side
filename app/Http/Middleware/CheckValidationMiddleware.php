@@ -59,6 +59,26 @@ class CheckValidationMiddleware
             $request->validate(app(RemoveWorkspaceMemberRequest::class)->rules());
         }
         
+        // Admin read request validations
+        if ($validation_type === 'workspace_read_request') {
+            // No validation needed - handled by WorkspaceReadRequest form request
+        }
+        if ($validation_type === 'channel_read_request') {
+            // No validation needed - handled by ChannelReadRequest form request
+        }
+        if ($validation_type === 'message_read_request') {
+            // No validation needed - handled by MessageReadRequest form request
+        }
+        if ($validation_type === 'user_read_request') {
+            // No validation needed - handled by UserReadRequest form request
+        }
+        if ($validation_type === 'team_read_request') {
+            // No validation needed - handled by TeamReadRequest form request
+        }
+        if ($validation_type === 'impersonate_read_request') {
+            // No validation needed - handled by ImpersonateReadRequest form request
+        }
+        
         return $next($request);
     }
 }

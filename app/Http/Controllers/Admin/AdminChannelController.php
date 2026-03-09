@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ChannelReadRequest;
-use App\Http\Resources\ChannelResource;
+use App\Http\Resources\admin\AdminChannelResource;
 
 class AdminChannelController extends Controller
 {
@@ -16,8 +16,8 @@ class AdminChannelController extends Controller
             'success' => true,
             'message' => 'Channel(s) retrieved successfully!',
             'data' => $channels instanceof \Illuminate\Database\Eloquent\Collection
-                ? ChannelResource::collection($channels)
-                : ChannelResource::make($channels),
+                ? AdminChannelResource::collection($channels)
+                : AdminChannelResource::make($channels),
         ]);
     }
 }

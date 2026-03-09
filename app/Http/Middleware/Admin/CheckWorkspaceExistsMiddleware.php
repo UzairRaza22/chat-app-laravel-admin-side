@@ -4,7 +4,7 @@ namespace App\Http\Middleware\Admin;
 
 use Closure;
 use Illuminate\Http\Request;
-use App\Models\Workspace;
+use App\Models\Admin\Workspace;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckWorkspaceExistsMiddleware

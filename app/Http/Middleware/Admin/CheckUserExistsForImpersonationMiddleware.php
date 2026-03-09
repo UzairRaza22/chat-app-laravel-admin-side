@@ -5,13 +5,22 @@ namespace App\Http\Middleware\Admin;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\User;
+use App\Models\Admin\User;
 
 class CheckUserExistsForImpersonationMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $userId = $request->route('user_id');
+        // Get user_id from query parameters, not route parameters
+        $userId = $request->query('user_id') ?? $request->input('user_id');
+        
+        if (!$userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User ID is required.'
+            ], 400);
+        }
+        
         $user = User::find($userId);
 
         if (!$user) {

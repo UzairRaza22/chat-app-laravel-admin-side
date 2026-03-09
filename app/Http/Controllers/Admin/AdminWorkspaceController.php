@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\WorkspaceReadRequest;
-use App\Http\Resources\WorkspaceResource;
+use App\Http\Resources\admin\AdminWorkspaceResource;
 
 class AdminWorkspaceController extends Controller
 {
@@ -16,8 +16,8 @@ class AdminWorkspaceController extends Controller
             'success' => true,
             'message' => 'Workspace(s) retrieved successfully!',
             'data' => $workspaces instanceof \Illuminate\Database\Eloquent\Collection
-                ? WorkspaceResource::collection($workspaces)
-                : WorkspaceResource::make($workspaces),
+                ? AdminWorkspaceResource::collection($workspaces)
+                : AdminWorkspaceResource::make($workspaces),
         ]);
     }
 }

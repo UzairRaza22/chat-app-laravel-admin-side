@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware\auth;
 
-use App\Models\User;
+use App\Models\Admin\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;

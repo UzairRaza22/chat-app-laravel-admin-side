@@ -5,9 +5,8 @@ use App\Http\Controllers\Admin\AdminChannelController;
 
 // Admin Read Channels (all or single)
 Route::middleware([
-    'check.admin',
-    'check.tokens',
-    'check.validation:channel_read_request'
+    'admin.auth',                    // Admin token authentication
+    'admin.channel.exists'           // Check if channel exists when channel_id provided
 ])->group(function () {
     Route::get('/read', [AdminChannelController::class, 'read']);
 });

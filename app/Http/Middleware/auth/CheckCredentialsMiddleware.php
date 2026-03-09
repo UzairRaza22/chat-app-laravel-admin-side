@@ -4,7 +4,7 @@ namespace App\Http\Middleware\auth;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, Hash};
-use App\Models\User;
+use App\Models\Admin\User;
 use Closure;
 use Symfony\Component\HttpFoundation\Response;
 

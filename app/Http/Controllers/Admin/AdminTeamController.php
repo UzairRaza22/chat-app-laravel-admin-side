@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\TeamReadRequest;
-use App\Http\Resources\TeamResource;
+use App\Http\Resources\admin\AdminTeamResource;
 
 class AdminTeamController extends Controller
 {
@@ -16,8 +16,8 @@ class AdminTeamController extends Controller
             'success' => true,
             'message' => 'Team(s) retrieved successfully!',
             'data' => $teams instanceof \Illuminate\Database\Eloquent\Collection
-                ? TeamResource::collection($teams)
-                : TeamResource::make($teams),
+                ? AdminTeamResource::collection($teams)
+                : AdminTeamResource::make($teams),
         ]);
     }
 }

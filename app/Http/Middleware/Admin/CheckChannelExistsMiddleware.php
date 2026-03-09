@@ -4,14 +4,15 @@ namespace App\Http\Middleware\Admin;
 
 use Closure;
 use Illuminate\Http\Request;
-use App\Models\Channel;
+use App\Models\Admin\Channel;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckChannelExistsMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $channelId = $request->route('channel_id');
+        // Get channel_id from query parameters, not route parameters
+        $channelId = $request->query('channel_id') ?? $request->input('channel_id');
 
         if ($channelId && !Channel::find($channelId)) {
             return response()->json([

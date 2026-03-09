@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserReadRequest;
-use App\Http\Resources\UserResource;
+use App\Http\Resources\admin\AdminUserResource;
 
 class AdminUserController extends Controller
 {
@@ -16,8 +16,8 @@ class AdminUserController extends Controller
             'success' => true,
             'message' => 'User(s) retrieved successfully!',
             'data' => $users instanceof \Illuminate\Database\Eloquent\Collection
-                ? UserResource::collection($users)
-                : UserResource::make($users),
+                ? AdminUserResource::collection($users)
+                : AdminUserResource::make($users),
         ]);
     }
 }

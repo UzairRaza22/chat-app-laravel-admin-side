@@ -3,7 +3,7 @@
 namespace App\Http\Middleware\AdminAuth;
 
 use App\Models\Admin\Admin;
-use App\Models\User;
+use App\Models\Admin\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
