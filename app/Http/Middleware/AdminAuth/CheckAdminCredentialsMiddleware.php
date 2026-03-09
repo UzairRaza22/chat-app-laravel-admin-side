@@ -17,10 +17,10 @@ class CheckAdminCredentialsMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $email = data_get($request, 'email');
+        $email = strtolower(trim(data_get($request, 'email')));
         $password = data_get($request, 'password');
 
-        $admin = Admin::where('email', $email)->first();
+        $admin = Admin::whereRaw(['email' => ['$regex' => '^' . preg_quote($email) . '$', '$options' => 'i']])->first();
 
         if (!$admin || !Hash::check($password, $admin->password)) {
             return response()->json([

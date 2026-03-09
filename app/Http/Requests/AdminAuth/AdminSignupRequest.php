@@ -28,4 +28,14 @@ class AdminSignupRequest extends FormRequest
             'password' => 'required|string|min:8|confirmed',
         ];
     }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'email' => strtolower(trim($this->email)),
+        ]);
+    }
 }

@@ -78,7 +78,7 @@ class Admin extends Model
     {
         return self::create([
             'name' => data_get($data, 'name'),
-            'email' => data_get($data, 'email'),
+            'email' => strtolower(data_get($data, 'email')),
             'password' => data_get($data, 'password'),
             'is_active' => false,
         ]);

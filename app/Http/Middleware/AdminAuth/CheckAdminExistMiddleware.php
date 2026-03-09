@@ -12,10 +12,10 @@ class CheckAdminExistMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $email = $request->email;
+        $email = strtolower(trim($request->email));
         
-        // Check if email already exists in admin table
-        $admin = Admin::where('email', $email)->first();
+        // Check if email already exists in admin table (case-insensitive)
+        $admin = Admin::whereRaw(['email' => ['$regex' => '^' . preg_quote($email) . '$', '$options' => 'i']])->first();
         
         if ($admin) {
             return response()->json([
@@ -23,8 +23,8 @@ class CheckAdminExistMiddleware
             ], 409);
         }
         
-        // Check if email already exists in user table (cross-table validation)
-        $user = User::where('email', $email)->first();
+        // Check if email already exists in user table (cross-table validation, case-insensitive)
+        $user = User::whereRaw(['email' => ['$regex' => '^' . preg_quote($email) . '$', '$options' => 'i']])->first();
         
         if ($user) {
             return response()->json([
