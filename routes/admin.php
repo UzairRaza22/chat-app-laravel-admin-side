@@ -35,6 +35,7 @@ Route::prefix('auth')->group(function () {
         'check.admin.validation:reset_password_request',
         'check.admin.token:admin_forgot_password_token',
     ]);
+
     // Admin logout route
     Route::post('/logout', [AdminAuthController::class, 'logout'])->middleware([
         'check.admin.token:admin_login_token',

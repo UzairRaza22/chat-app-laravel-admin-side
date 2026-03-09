@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Workspace;
 use App\Http\Resources\WorkspaceResource;
-use App\Models\User;
+use App\Models\Admin\User;
 
 class WorkspaceController extends Controller
 {

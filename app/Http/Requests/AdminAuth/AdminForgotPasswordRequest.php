@@ -25,4 +25,14 @@ class AdminForgotPasswordRequest extends FormRequest
             'email' => 'required|email',
         ];   
     }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'email' => strtolower(trim($this->email)),
+        ]);
+    }
 }

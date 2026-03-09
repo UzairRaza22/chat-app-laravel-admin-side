@@ -6,9 +6,6 @@ use MongoDB\Laravel\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Workspace;
-use App\Models\Team;
-use App\Models\Task;
 
 class Admin extends Model
 {
@@ -77,17 +74,11 @@ class Admin extends Model
         return $this->belongsToMany(Team::class, null, 'admin_ids', 'team_ids');
     }
 
-    public function tasks()
-    {
-        return $this->belongsToMany(Task::class, null, 'task_ids', 'assignee_ids');
-    }
-
-
     public static function add($data)
     {
         return self::create([
             'name' => data_get($data, 'name'),
-            'email' => data_get($data, 'email'),
+            'email' => strtolower(data_get($data, 'email')),
             'password' => data_get($data, 'password'),
             'is_active' => false,
         ]);

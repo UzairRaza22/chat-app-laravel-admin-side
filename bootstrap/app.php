@@ -24,12 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.token' => \App\Http\Middleware\ApiTokenAuth::class,
             'check.validation' => \App\Http\Middleware\CheckValidationMiddleware::class,
             'check.admin.validation' => \App\Http\Middleware\CheckAdminValidationMiddleware::class,
-            'check.token' => \App\Http\Middleware\auth\CheckTokenMiddleware::class,
             'check.admin.token' => \App\Http\Middleware\AdminAuth\CheckAdminTokenMiddleware::class,
-            'check.credentials' => \App\Http\Middleware\auth\CheckCredentialsMiddleware::class,
-            'check.active' => \App\Http\Middleware\auth\CheckActiveMiddleware::class,
-            'check.user.exists' => \App\Http\Middleware\auth\CheckUserExistMiddleware::class,
-            'check.user.exists.forgot' => \App\Http\Middleware\auth\CheckUserExistForForgotMiddleware::class,
             'workspace.unique.name' => \App\Http\Middleware\Workspace\CheckUniqueWorkspaceNameMiddleware::class,
             'workspace.creator' => \App\Http\Middleware\Workspace\CheckWorkspaceCreatorMiddleware::class,
             'workspace.exists' => \App\Http\Middleware\Workspace\CheckWorkspaceExistsMiddleware::class,
@@ -38,6 +33,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'check.admin.credentials' => \App\Http\Middleware\AdminAuth\CheckAdminCredentialsMiddleware::class,
             'check.admin.active' => \App\Http\Middleware\AdminAuth\CheckAdminActiveMiddleware::class,
             'check.admin.exists.forgot' => \App\Http\Middleware\AdminAuth\CheckAdminExistForForgotMiddleware::class,
+            // Admin read operations middleware - uses admin login token for authentication
+            'admin.auth' => \App\Http\Middleware\AdminAuth\CheckAdminTokenMiddleware::class . ':admin_login_token',
+            // Admin resource existence validation middleware
+            'admin.workspace.exists' => \App\Http\Middleware\Admin\CheckWorkspaceExistsMiddleware::class,
+            'admin.channel.exists' => \App\Http\Middleware\Admin\CheckChannelExistsMiddleware::class,
+            'admin.team.exists' => \App\Http\Middleware\Admin\CheckTeamExistsMiddleware::class,
+            'admin.message.exists' => \App\Http\Middleware\Admin\CheckMessageExistsMiddleware::class,
+            'admin.user.exists.impersonate' => \App\Http\Middleware\Admin\CheckUserExistsForImpersonationMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
