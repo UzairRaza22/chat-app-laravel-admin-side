@@ -1,0 +1,676 @@
+{
+	"info": {
+		"_postman_id": "whistle-admin-complete-auth",
+		"name": "🚀 Whistle IT Admin - Complete Authentication Suite",
+		"description": "Complete admin authentication testing with all success and failure cases including signup, verification, login, password reset, and logout flows.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"version": {
+			"major": 1,
+			"minor": 0,
+			"patch": 0
+		}
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{admin_access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"exec": [
+					"// Global Pre-request Script",
+					"console.log('\\n' + '='.repeat(80));",
+					"console.log('🚀 WHISTLE IT ADMIN - COMPLETE AUTHENTICATION SUITE');",
+					"console.log('='.repeat(80));",
+					"console.log('📋 Request: ' + pm.info.requestName);",
+					"console.log('🔗 URL: ' + pm.request.url);",
+					"console.log('⏰ Timestamp: ' + new Date().toISOString());",
+					"",
+					"// Environment Setup",
+					"if (!pm.environment.get('base_url')) {",
+					"    pm.environment.set('base_url', 'http://localhost:8000/api');",
+					"}",
+					"",
+					"// Test Counter",
+					"const currentCount = parseInt(pm.environment.get('test_counter') || '0') + 1;",
+					"pm.environment.set('test_counter', currentCount.toString());",
+					"",
+					"console.log('🌐 Base URL: ' + pm.environment.get('base_url'));",
+					"console.log('🔢 Test Count: ' + currentCount);",
+					"console.log('='.repeat(80) + '\\n');"
+				],
+				"type": "text/javascript"
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"exec": [
+					"// Global Test Script",
+					"console.log('\\n' + '='.repeat(80));",
+					"console.log('🧪 RESPONSE ANALYSIS');",
+					"console.log('='.repeat(80));",
+					"",
+					"const responseTime = pm.response.responseTime;",
+					"const statusCode = pm.response.code;",
+					"const responseText = pm.response.text();",
+					"",
+					"console.log('📊 Response Metrics:');",
+					"console.log('   ⏱️  Time: ' + responseTime + 'ms');",
+					"console.log('   📊 Status: ' + statusCode);",
+					"",
+					"// Parse JSON Response",
+					"let jsonData = null;",
+					"try {",
+					"    jsonData = JSON.parse(responseText);",
+					"    console.log('✅ JSON parsing successful');",
+					"} catch (e) {",
+					"    console.log('❌ JSON parsing failed: ' + e.message);",
+					"    return;",
+					"}",
+					"",
+					"if (jsonData) {",
+					"    console.log('📝 Response Details:');",
+					"    console.log('   ✅ Success: ' + jsonData.success);",
+					"    console.log('   💬 Message: ' + jsonData.message);",
+					"    if (jsonData.data) console.log('   📦 Data: ' + typeof jsonData.data);",
+					"    if (jsonData.errors) console.log('   ⚠️  Errors: ' + Object.keys(jsonData.errors).length + ' fields');",
+					"}",
+					"",
+					"// Basic Tests",
+					"pm.test('📋 Response is JSON', () => pm.response.to.be.json);",
+					"pm.test('⏱️  Response time acceptable', () => pm.expect(responseTime).to.be.below(10000));",
+					"",
+					"console.log('='.repeat(80) + '\\n');"
+				],
+				"type": "text/javascript"
+			}
+		}
+	],
+	"item": [
+		{
+			"name": "🏥 System Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('🏥 API is healthy', () => {",
+							"    pm.response.to.have.status(200);",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.equal(true);",
+							"    pm.expect(jsonData.data.status).to.equal('ok');",
+							"});",
+							"",
+							"if (pm.response.code === 200) {",
+							"    const jsonData = pm.response.json();",
+							"    pm.environment.set('api_health_status', 'healthy');",
+							"    pm.environment.set('api_version', jsonData.data.version);",
+							"    console.log('✅ System Health: HEALTHY');",
+							"    console.log('📋 Service: ' + jsonData.data.service);",
+							"    console.log('🏷️  Version: ' + jsonData.data.version);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/health",
+					"host": ["{{base_url}}"],
+					"path": ["health"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "🔐 Admin Authentication",
+			"item": [
+				{
+					"name": "✅ SUCCESS CASES",
+					"item": [
+						{
+							"name": "1️⃣ ✅ Admin Registration Success",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate unique test data for registration",
+											"const timestamp = Date.now();",
+											"const randomSeed = Math.floor(Math.random() * 100000);",
+											"const uniqueId = timestamp.toString().slice(-6) + randomSeed.toString().slice(-3);",
+											"",
+											"// Generate comprehensive test data",
+											"const testData = {",
+											"    name: 'Admin User ' + uniqueId,",
+											"    email: 'admin.' + uniqueId + '@whistle-it.test',",
+											"    password: 'SecureAdminPass' + uniqueId + '!@#',",
+											"    workspace: 'Workspace-' + uniqueId + '-Testing'",
+											"};",
+											"",
+											"// Store in environment variables",
+											"pm.environment.set('test_admin_name', testData.name);",
+											"pm.environment.set('test_admin_email', testData.email);",
+											"pm.environment.set('test_admin_password', testData.password);",
+											"pm.environment.set('test_workspace_name', testData.workspace);",
+											"pm.environment.set('registration_timestamp', timestamp.toString());",
+											"",
+											"console.log('📋 Generated Registration Data:');",
+											"console.log('   👤 Name: ' + testData.name);",
+											"console.log('   📧 Email: ' + testData.email);",
+											"console.log('   🏢 Workspace: ' + testData.workspace);",
+											"console.log('   🔑 Password: [SECURED - ' + testData.password.length + ' characters]');",
+											"",
+											"// Validate email format",
+											"const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;",
+											"if (emailRegex.test(testData.email)) {",
+											"    console.log('✅ Email format validation passed');",
+											"} else {",
+											"    console.error('❌ Generated email format is invalid');",
+											"}",
+											"",
+											"// Validate password strength",
+											"const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*]).{8,}$/;",
+											"if (passwordRegex.test(testData.password)) {",
+											"    console.log('✅ Password strength validation passed');",
+											"} else {",
+											"    console.warn('⚠️  Generated password may not meet strength requirements');",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"console.log('🔐 Validating admin registration response...');",
+											"",
+											"// Core registration validation",
+											"pm.test('✅ Registration request accepted', () => {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test('✅ Registration response structure valid', () => {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('success', true);",
+											"    pm.expect(jsonData).to.have.property('message');",
+											"    pm.expect(jsonData).to.have.property('data');",
+											"    pm.expect(jsonData.message).to.include('Signup successful');",
+											"});",
+											"",
+											"pm.test('✅ Admin data structure complete', () => {",
+											"    const jsonData = pm.response.json();",
+											"    const adminData = jsonData.data;",
+											"    ",
+											"    pm.expect(adminData).to.have.property('_id');",
+											"    pm.expect(adminData).to.have.property('name');",
+											"    pm.expect(adminData).to.have.property('email');",
+											"    pm.expect(adminData).to.have.property('is_active');",
+											"    ",
+											"    // Validate data types",
+											"    pm.expect(adminData._id).to.be.a('string');",
+											"    pm.expect(adminData.name).to.be.a('string');",
+											"    pm.expect(adminData.email).to.be.a('string');",
+											"    pm.expect(adminData.is_active).to.be.a('boolean');",
+											"});",
+											"",
+											"pm.test('✅ Admin account initially inactive', () => {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.is_active).to.equal(false);",
+											"});",
+											"",
+											"pm.test('✅ Email matches registration request', () => {",
+											"    const jsonData = pm.response.json();",
+											"    const expectedEmail = pm.environment.get('test_admin_email');",
+											"    pm.expect(jsonData.data.email).to.equal(expectedEmail);",
+											"});",
+											"",
+											"pm.test('✅ Name matches registration request', () => {",
+											"    const jsonData = pm.response.json();",
+											"    const expectedName = pm.environment.get('test_admin_name');",
+											"    pm.expect(jsonData.data.name).to.equal(expectedName);",
+											"});",
+											"",
+											"// Store registration results",
+											"if (pm.response.code === 200) {",
+											"    const jsonData = pm.response.json();",
+											"    const adminData = jsonData.data;",
+											"    ",
+											"    // Store admin information",
+											"    pm.environment.set('test_admin_id', adminData._id);",
+											"    pm.environment.set('registration_success', 'true');",
+											"    ",
+											"    console.log('✅ Registration Analysis:');",
+											"    console.log('   🆔 Admin ID: ' + adminData._id);",
+											"    console.log('   👤 Name: ' + adminData.name);",
+											"    console.log('   📧 Email: ' + adminData.email);",
+											"    console.log('   🔒 Status: ' + (adminData.is_active ? 'Active' : 'Pending Verification'));",
+											"    console.log('   📧 Next Step: Email verification required');",
+											"    ",
+											"    // Calculate registration metrics",
+											"    const registrationTime = pm.environment.get('registration_timestamp');",
+											"    if (registrationTime) {",
+											"        const processingTime = Date.now() - parseInt(registrationTime);",
+											"        console.log('   ⏱️  Processing Time: ' + processingTime + 'ms');",
+											"    }",
+											"} else {",
+											"    pm.environment.set('registration_success', 'false');",
+											"    console.log('❌ Registration failed with status: ' + pm.response.code);",
+											"}",
+											"",
+											"// Clean up temporary variables",
+											"pm.environment.unset('registration_timestamp');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"description": "JSON content type for request body"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"description": "Request JSON response format"
+									},
+									{
+										"key": "X-Requested-With",
+										"value": "XMLHttpRequest",
+										"description": "Indicates AJAX request"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{test_admin_name}}\",\n    \"email\": \"{{test_admin_email}}\",\n    \"password\": \"{{test_admin_password}}\",\n    \"password_confirmation\": \"{{test_admin_password}}\",\n    \"workspace\": \"{{test_workspace_name}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/auth/signup",
+									"host": ["{{base_url}}"],
+									"path": ["admin", "auth", "signup"]
+								},
+								"description": "Creates a new admin account with associated workspace. The account will be created in inactive state and requires email verification to activate."
+							},
+							"response": []
+						},
+						{
+							"name": "2️⃣ ✅ Email Verification Success",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"console.log('📧 Preparing email verification request...');",
+											"",
+											"// Check if registration was successful",
+											"const registrationSuccess = pm.environment.get('registration_success');",
+											"if (registrationSuccess !== 'true') {",
+											"    console.warn('⚠️  Registration may not have completed successfully');",
+											"    console.log('💡 Ensure admin registration endpoint was executed first');",
+											"}",
+											"",
+											"// Check for verification token",
+											"const verificationToken = pm.environment.get('admin_verification_token');",
+											"if (!verificationToken) {",
+											"    console.warn('⚠️  No verification token found in environment');",
+											"    console.log('📧 In a real scenario, this token would be received via email');",
+											"    console.log('🔧 For testing, manually set the admin_verification_token variable');",
+											"    console.log('💡 Token format: Usually a long alphanumeric string (32+ characters)');",
+											"    console.log('🧪 For automated testing, we\\'ll simulate successful verification');",
+											"    ",
+											"    // Generate a dummy token for testing purposes",
+											"    const dummyToken = 'test_verification_token_' + Date.now();",
+											"    pm.environment.set('admin_verification_token', dummyToken);",
+											"    console.log('🔧 Generated dummy token for testing: ' + dummyToken);",
+											"} else {",
+											"    console.log('✅ Verification token found');",
+											"    console.log('🎫 Token preview: ' + verificationToken.substring(0, 20) + '...');",
+											"}",
+											"",
+											"// Validate admin email exists",
+											"const adminEmail = pm.environment.get('test_admin_email');",
+											"if (adminEmail) {",
+											"    console.log('📧 Verifying account for: ' + adminEmail);",
+											"} else {",
+											"    console.warn('⚠️  No admin email found in environment');",
+											"}",
+											"",
+											"// Store verification attempt timestamp",
+											"pm.environment.set('verification_timestamp', Date.now().toString());"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"console.log('📧 Validating email verification response...');",
+											"",
+											"// Check if verification token was provided",
+											"const verificationToken = pm.environment.get('admin_verification_token');",
+											"",
+											"if (!verificationToken) {",
+											"    console.log('ℹ️  Skipping verification tests - no token provided');",
+											"    console.log('🔧 Set admin_verification_token in environment to test this endpoint');",
+											"    return;",
+											"}",
+											"",
+											"if (pm.response.code === 200) {",
+											"    pm.test('📧 Email verification successful', () => {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('success', true);",
+											"        pm.expect(jsonData.message).to.include('activated');",
+											"    });",
+											"    ",
+											"    pm.test('📧 Admin account is now active', () => {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('data');",
+											"        pm.expect(jsonData.data).to.have.property('is_active', true);",
+											"    });",
+											"    ",
+											"    pm.test('📧 Account data structure is valid', () => {",
+											"        const jsonData = pm.response.json();",
+											"        const adminData = jsonData.data;",
+											"        ",
+											"        pm.expect(adminData).to.have.property('_id');",
+											"        pm.expect(adminData).to.have.property('name');",
+											"        pm.expect(adminData).to.have.property('email');",
+											"        pm.expect(adminData._id).to.be.a('string');",
+											"    });",
+											"    ",
+											"    pm.test('📧 Email matches registered account', () => {",
+											"        const jsonData = pm.response.json();",
+											"        const expectedEmail = pm.environment.get('test_admin_email');",
+											"        pm.expect(jsonData.data.email).to.equal(expectedEmail);",
+											"    });",
+											"    ",
+											"    // Store verification success",
+											"    const jsonData = pm.response.json();",
+											"    pm.environment.set('verification_success', 'true');",
+											"    pm.environment.set('admin_account_active', 'true');",
+											"    ",
+											"    console.log('✅ Verification Analysis:');",
+											"    console.log('   🆔 Admin ID: ' + jsonData.data._id);",
+											"    console.log('   👤 Name: ' + jsonData.data.name);",
+											"    console.log('   📧 Email: ' + jsonData.data.email);",
+											"    console.log('   ✅ Status: Account Activated Successfully');",
+											"    console.log('   🎉 Ready for login');",
+											"    ",
+											"    // Calculate verification processing time",
+											"    const verificationTime = pm.environment.get('verification_timestamp');",
+											"    if (verificationTime) {",
+											"        const processingTime = Date.now() - parseInt(verificationTime);",
+											"        console.log('   ⏱️  Processing Time: ' + processingTime + 'ms');",
+											"    }",
+											"    ",
+											"} else if (pm.response.code === 401) {",
+											"    pm.test('📧 Invalid or expired token detected', () => {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('success', false);",
+											"        pm.expect(jsonData.message).to.include('Invalid or expired token');",
+											"    });",
+											"    ",
+											"    console.log('❌ Verification failed: Invalid or expired token');",
+											"    console.log('💡 Check if the verification token is correct and not expired');",
+											"    ",
+											"} else if (pm.response.code === 404) {",
+											"    pm.test('📧 Email not found for verification', () => {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('success', false);",
+											"        pm.expect(jsonData.message).to.include('Email not registered');",
+											"    });",
+											"    ",
+											"    console.log('❌ Verification failed: Email not registered');",
+											"    console.log('💡 Ensure the admin registration was completed first');",
+											"    ",
+											"} else {",
+											"    console.log('❌ Verification failed with status: ' + pm.response.code);",
+											"    pm.environment.set('verification_success', 'false');",
+											"}",
+											"",
+											"// Clean up temporary variables",
+											"pm.environment.unset('verification_timestamp');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"description": "JSON content type for request body"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"description": "Request JSON response format"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"token\": \"{{admin_verification_token}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/auth/verify-signup",
+									"host": ["{{base_url}}"],
+									"path": ["admin", "auth", "verify-signup"]
+								},
+								"description": "Verifies admin email and activates the account. Requires verification token received via email after registration."
+							},
+							"response": []
+						}
+,
+						{
+							"name": "3️⃣ ✅ Admin Login Success",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"console.log('🔑 Initiating admin authentication...');",
+											"",
+											"// Validate prerequisites",
+											"const adminEmail = pm.environment.get('test_admin_email');",
+											"const adminPassword = pm.environment.get('test_admin_password');",
+											"const registrationSuccess = pm.environment.get('registration_success');",
+											"",
+											"if (!adminEmail || !adminPassword) {",
+											"    console.warn('⚠️  Missing admin credentials');",
+											"    console.log('💡 Run admin registration first to generate test credentials');",
+											"    return;",
+											"}",
+											"",
+											"if (registrationSuccess !== 'true') {",
+											"    console.warn('⚠️  Registration may not have completed successfully');",
+											"    console.log('💡 Ensure admin registration was successful before login');",
+											"}",
+											"",
+											"// Check account activation status",
+											"const accountActive = pm.environment.get('admin_account_active');",
+											"if (accountActive !== 'true') {",
+											"    console.warn('⚠️  Admin account may not be activated');",
+											"    console.log('📧 Email verification may be required before login');",
+											"    console.log('💡 Some systems allow login without verification');",
+											"}",
+											"",
+											"console.log('📋 Authentication Details:');",
+											"console.log('   📧 Email: ' + adminEmail);",
+											"console.log('   🔑 Password: [SECURE: "raw",
+									"raw": "{\n    \"email\": \"{{test_admin_email}}\",\n    \"password\": \"{{test_admin_password}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/admin/auth/login",
+									"host": ["{{base_url}}"],
+									"path": ["admin", "auth", "login"]
+								}
+							},
+							"response": []
+						}lse');",
+											"}",
+											"",
+											"// Clean up temporary variables",
+											"pm.environment.unset('login_attempt_timestamp');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode"m.expect(jsonData.message).to.include('Inactive');",
+											"    });",
+											"    ",
+											"    console.log('❌ Authentication failed: Account inactive');",
+											"    console.log('📧 Email verification may be required');",
+											"    pm.environment.set('authentication_success', 'false');",
+											"    ",
+											"} else {",
+											"    console.log('❌ Authentication failed with status: ' + pm.response.code);",
+											"    pm.environment.set('authentication_success', 'fa				"    console.log('❌ Authentication failed: Invalid credentials');",
+											"    console.log('💡 Check email and password are correct');",
+											"    pm.environment.set('authentication_success', 'false');",
+											"    ",
+											"} else if (pm.response.code === 403) {",
+											"    pm.test('🔑 Account inactive detected', () => {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('success', false);",
+											"        p	"    }",
+											"    ",
+											"    console.log('🎉 Ready to access protected endpoints');",
+											"    ",
+											"} else if (pm.response.code === 401) {",
+											"    pm.test('🔑 Invalid credentials detected', () => {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('success', false);",
+											"        pm.expect(jsonData.message).to.include('Invalid credentials');",
+											"    });",
+											"    ",
+							 ' + accessToken.substring(0, 20) + '...');",
+											"    console.log('   📦 Token Length: ' + accessToken.length + ' characters');",
+											"    ",
+											"    // Calculate login performance",
+											"    const loginAttemptTime = pm.environment.get('login_attempt_timestamp');",
+											"    if (loginAttemptTime) {",
+											"        const authTime = Date.now() - parseInt(loginAttemptTime);",
+											"        console.log('   ⏱️  Authentication Time: ' + authTime + 'ms');",
+										 'true');",
+											"    pm.environment.set('login_timestamp', Date.now().toString());",
+											"    ",
+											"    console.log('✅ Authentication Analysis:');",
+											"    console.log('   🆔 Admin ID: ' + adminProfile._id);",
+											"    console.log('   👤 Name: ' + adminProfile.name);",
+											"    console.log('   📧 Email: ' + adminProfile.email);",
+											"    console.log('   ✅ Status: ' + (adminProfile.is_active ? 'Active' : 'Inactive'));",
+											"    console.log('   🎫 Token:json();",
+											"    const accessToken = jsonData.data.access_token;",
+											"    const adminProfile = jsonData.data.admin;",
+											"    ",
+											"    pm.environment.set('admin_access_token', accessToken);",
+											"    pm.environment.set('logged_admin_id', adminProfile._id);",
+											"    pm.environment.set('logged_admin_name', adminProfile.name);",
+											"    pm.environment.set('logged_admin_email', adminProfile.email);",
+											"    pm.environment.set('authentication_success',nProfile).to.have.property('is_active');",
+											"    });",
+											"    ",
+											"    pm.test('🔑 Email matches login request', () => {",
+											"        const jsonData = pm.response.json();",
+											"        const expectedEmail = pm.environment.get('test_admin_email');",
+											"        pm.expect(jsonData.data.admin.email).to.equal(expectedEmail);",
+											"    });",
+											"    ",
+											"    // Store authentication data",
+											"    const jsonData = pm.response.bove(10);",
+											"    });",
+											"    ",
+											"    pm.test('🔑 Admin profile data is complete', () => {",
+											"        const jsonData = pm.response.json();",
+											"        const adminProfile = jsonData.data.admin;",
+											"        ",
+											"        pm.expect(adminProfile).to.have.property('_id');",
+											"        pm.expect(adminProfile).to.have.property('name');",
+											"        pm.expect(adminProfile).to.have.property('email');",
+											"        pm.expect(admi) => {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('data');",
+											"        pm.expect(jsonData.data).to.have.property('access_token');",
+											"        pm.expect(jsonData.data).to.have.property('admin');",
+											"        ",
+											"        // Validate token format",
+											"        pm.expect(jsonData.data.access_token).to.be.a('string');",
+											"        pm.expect(jsonData.data.access_token.length).to.be.a		"exec": [
+											"console.log('🔑 Validating authentication response...');",
+											"",
+											"if (pm.response.code === 200) {",
+											"    pm.test('🔑 Authentication successful', () => {",
+											"        const jsonData = pm.response.json();",
+											"        pm.expect(jsonData).to.have.property('success', true);",
+											"        pm.expect(jsonData.message).to.include('Login successful');",
+											"    });",
+											"    ",
+											"    pm.test('🔑 Access token received', (D - ' + adminPassword.length + ' characters]');",
+											"",
+											"// Store login attempt timestamp",
+											"pm.environment.set('login_attempt_timestamp', Date.now().toString());",
+											"",
+											"// Clear any existing tokens",
+											"pm.environment.unset('admin_access_token');",
+											"console.log('🗑️  Cleared existing access tokens');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+								

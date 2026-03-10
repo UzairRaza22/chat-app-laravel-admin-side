@@ -20,14 +20,31 @@ class CheckAdminCredentialsMiddleware
         $email = strtolower(trim(data_get($request, 'email')));
         $password = data_get($request, 'password');
 
-        $admin = Admin::whereRaw(['email' => ['$regex' => '^' . preg_quote($email) . '$', '$options' => 'i']])->first();
-
-        if (!$admin || !Hash::check($password, $admin->password)) {
+        if (!$email || !$password) {
             return response()->json([
-                'message' => 'Invalid credentials'
+                'success' => false,
+                'message' => 'Email and password are required.'
+            ], 422);
+        }
+
+        $admin = Admin::where('email', $email)->first();
+
+        if (!$admin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials. Admin not found.'
             ], 401);
         }
 
+        if (!Hash::check($password, $admin->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials. Password incorrect.'
+            ], 401);
+        }
+
+        $request->merge(['user' => $admin]);
+        
         $request->setUserResolver(function () use ($admin) {
             return $admin;
         });

@@ -20,18 +20,12 @@ class CheckAdminActiveMiddleware
         
         // 2. Check if admin exists before updating
         if (!$admin) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Admin not found.'
-            ], 404);
+            return response()->notFound('Admin not found.');
         }
         
         // 3. Admin Activity Check
         if (!$admin->is_active) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Admin Account Inactive: Please contact the system owner to activate your account.'
-            ], 403);
+            return response()->forbidden('Admin Account Inactive: Please contact the system owner to activate your account.');
         }
         
         // If all checks pass, proceed to the next request

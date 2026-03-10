@@ -10,14 +10,11 @@ class AdminUserController extends Controller
 {
     public function read(UserReadRequest $request)
     {
-        $users = $request->validatedUser();
+        $users = data_get($request, 'validatedUser');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User(s) retrieved successfully!',
-            'data' => $users instanceof \Illuminate\Database\Eloquent\Collection
-                ? AdminUserResource::collection($users)
-                : AdminUserResource::make($users),
-        ]);
+        return response()->success(
+            'User(s) retrieved successfully!',
+            AdminUserResource::collection(collect($users))
+        );
     }
 }

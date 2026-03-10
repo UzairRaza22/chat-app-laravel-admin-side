@@ -10,14 +10,11 @@ class AdminTeamController extends Controller
 {
     public function read(TeamReadRequest $request)
     {
-        $teams = $request->validatedTeam();
+        $teams = data_get($request, 'validatedTeam');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Team(s) retrieved successfully!',
-            'data' => $teams instanceof \Illuminate\Database\Eloquent\Collection
-                ? AdminTeamResource::collection($teams)
-                : AdminTeamResource::make($teams),
-        ]);
+        return response()->success(
+            'Team(s) retrieved successfully!',
+            AdminTeamResource::collection(collect($teams))
+        );
     }
 }

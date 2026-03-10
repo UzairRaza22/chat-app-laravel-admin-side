@@ -10,14 +10,11 @@ class AdminMessageController extends Controller
 {
     public function read(MessageReadRequest $request)
     {
-        $messages = $request->validatedMessage();
+        $messages = data_get($request, 'validatedMessage');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Message(s) retrieved successfully!',
-            'data' => $messages instanceof \Illuminate\Database\Eloquent\Collection
-                ? AdminMessageResource::collection($messages)
-                : AdminMessageResource::make($messages),
-        ]);
+        return response()->success(
+            'Message(s) retrieved successfully!',
+            AdminMessageResource::collection(collect($messages))
+        );
     }
 }
