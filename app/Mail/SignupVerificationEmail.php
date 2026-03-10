@@ -11,18 +11,18 @@ class SignupVerificationEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $user;
+    public $admin;
     public $token;
     public $verificationUrl;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($user, $token)
+    public function __construct($admin, $token)
     {
-        $this->user = $user;
+        $this->admin = $admin;
         $this->token = $token;
-        $this->verificationUrl = url("/api/verify-signup/{$token}");
+        $this->verificationUrl = url("/api/admin/auth/verify-signup/{$token}");
     }
 
     /**
@@ -31,7 +31,7 @@ class SignupVerificationEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Signup Verification Email',
+            subject: 'Admin Signup Verification Email',
         );
     }
 
@@ -41,9 +41,9 @@ class SignupVerificationEmail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.otp-registration',
+            view: 'emails.admin.otp-registration',
             with: [
-                'name' => $this->user->name,
+                'name' => $this->admin->name,
                 'otp' => $this->token,
             ],
         );

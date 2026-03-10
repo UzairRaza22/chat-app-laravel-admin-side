@@ -6,19 +6,19 @@ use App\Http\Controllers\AdminAuthController;
 // Admin authentication routes
 Route::prefix('auth')->group(function () {
     // Admin sign-up route
-    Route::post('/signup', [AdminAuthController::class, 'Signup'])->middleware([
+    Route::post('/signup', [AdminAuthController::class, 'signup'])->middleware([
         'check.admin.validation:signup_request',
         'check.admin.exists',
     ]);
 
     // Verify admin sign-up route
-    Route::post('/verify-signup', [AdminAuthController::class, 'VerifySignup'])->middleware([
+    Route::post('/verify-signup', [AdminAuthController::class, 'verifySignup'])->middleware([
         'check.admin.validation:verify_signup_request',
         'check.admin.token:admin_signup_verification_token',
     ]);
 
     // Admin login route
-    Route::post('/login', [AdminAuthController::class, 'Login'])->middleware([
+    Route::post('/login', [AdminAuthController::class, 'login'])->middleware([
         'check.admin.validation:login_request',
         'check.admin.credentials',
         'check.admin.active',

@@ -23,9 +23,7 @@ class CheckAdminCredentialsMiddleware
         $admin = Admin::whereRaw(['email' => ['$regex' => '^' . preg_quote($email) . '$', '$options' => 'i']])->first();
 
         if (!$admin || !Hash::check($password, $admin->password)) {
-            return response()->json([
-                'message' => 'Invalid credentials'
-            ], 401);
+            return response()->unauthorized('Invalid credentials');
         }
 
         $request->setUserResolver(function () use ($admin) {
