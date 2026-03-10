@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Admin\Admin;
 use App\Models\Admin\AdminSessionToken;
 use App\Models\Admin\AdminForgetToken;
-use App\Mail\Admin\SignupVerificationEmail;
-use App\Mail\Admin\PasswordResetEmail;
+use App\Mail\SignupVerificationEmail;
+use App\Mail\PasswordResetEmail;
 use Illuminate\Support\Facades\Mail;
 
 
@@ -17,7 +17,7 @@ class AdminAuthController extends Controller
     /**
      * Admin signup
      */
-    public function Signup(Request $request)
+    public function signup(Request $request)
     {
         $admin = Admin::add($request);
 
@@ -33,17 +33,15 @@ class AdminAuthController extends Controller
 
         Mail::to($request->email)->send(new SignupVerificationEmail($admin,$token));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Signup successfull!. Please check your email for verification link.',
+        return response()->success([
             'admin' => AdminResource::make($admin)
-        ]);
+        ], 'Signup successfull!. Please check your email for verification link.');
     }
 
     /**
      * Admin verify signup
      */
-    public function VerifySignup(Request $request)
+    public function verifySignup(Request $request)
     {
         $admin = $request->verified_admin;
         $tokenRecord = $request->token_record;
@@ -56,17 +54,15 @@ class AdminAuthController extends Controller
         // Delete the verification token
         $tokenRecord->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Account activated successfully! You can now login.',
+        return response()->success([
             'admin' => AdminResource::make($admin)
-        ]);
+        ], 'Account activated successfully! You can now login.');
     }
 
     /**
      * Admin login
      */
-    public function Login(Request $request)
+    public function login(Request $request)
     {
         $admin = $request->user();
 
@@ -75,12 +71,10 @@ class AdminAuthController extends Controller
         // Store encrypted token in admin model
         $admin->update(['access_token' => hash('sha256', $token)]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Login successful!',
+        return response()->success([
             'access_token' => $token,
             'admin' => AdminResource::make($admin)
-        ]);
+        ], 'Login successful!');
     }
 
     /**
@@ -96,10 +90,7 @@ class AdminAuthController extends Controller
 
         $tokenRecord->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Logout successful!'
-        ]);
+        return response()->success(null, 'Logout successful!');
     }
 
     /**
@@ -113,10 +104,7 @@ class AdminAuthController extends Controller
         
         Mail::to($admin->email)->send(new PasswordResetEmail($admin, $token));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Password reset code sent to your email.'
-        ]);
+        return response()->success(null, 'Password reset code sent to your email.');
     }
 
     /**
@@ -134,9 +122,6 @@ class AdminAuthController extends Controller
 
         $tokenRecord->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Password reset successfully!'
-        ]);
+        return response()->success(null, 'Password reset successfully!');
     }
 }
