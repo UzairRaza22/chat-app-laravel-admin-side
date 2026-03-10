@@ -16,9 +16,7 @@ class CheckAdminExistForForgotMiddleware
         $admin = Admin::whereRaw(['email' => ['$regex' => '^' . preg_quote($email) . '$', '$options' => 'i']])->first();
         
         if (!$admin) {
-            return response()->json([
-                'message' => 'Admin not found.'
-            ], 404);
+            return response()->notFound('Admin not found.');
         }
 
         // Add admin to request for controller use

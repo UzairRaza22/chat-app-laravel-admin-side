@@ -27,9 +27,7 @@ class CheckAdminTokenMiddleware
             $admin = Admin::where('email', $email)->first();
             
             if (!$admin) {
-                return response()->json([
-                    'message' => 'Email not registered.'
-                ], 404);
+                return response()->notFound('Email not registered.');
             }
         }
 
@@ -45,15 +43,11 @@ class CheckAdminTokenMiddleware
         \Log::info('CheckAdminTokenMiddleware extracted token: ' . $token . "'");
         
         if (!$token) {
-            return response()->json([
-                'message' => 'Token is required.',
-            ], 401);
+            return response()->unauthorized('Token is required.');
         }
         
         if (!$tokenType) {
-            return response()->json([
-                'message' => 'Token type is required.',
-            ], 401);
+            return response()->unauthorized('Token type is required.');
         }
         
         // Use appropriate token model based on token type
@@ -84,37 +78,27 @@ class CheckAdminTokenMiddleware
                 \Log::info('Token record type: ' . ($tokenRecord->token_type ?? 'N/A'));
             }
         } else {
-            return response()->json([
-                'message' => 'Invalid token type.',
-            ], 401);
+            return response()->unauthorized('Invalid token type.');
         }
             
         if (!$tokenRecord) {
-            return response()->json([
-                'message' => 'Invalid or expired token.'
-            ], 401);
+            return response()->unauthorized('Invalid or expired token.');
         }
 
         // Debug: Check what we have in tokenRecord
         if (!is_object($tokenRecord)) {
-            return response()->json([
-                'message' => 'Invalid token record format.'
-            ], 401);
+            return response()->unauthorized('Invalid token record format.');
         }
 
         // Check if tokenRecord has user_id before accessing it
         if (!isset($tokenRecord->admin_id) || empty($tokenRecord->admin_id)) {
-            return response()->json([
-                'message' => 'Invalid token format.'
-            ], 401);
+            return response()->unauthorized('Invalid token format.');
         }
 
         $admin = Admin::find((string) $tokenRecord->admin_id);
         
         if (!$admin) {
-            return response()->json([
-                'message' => 'Admin not found.'
-            ], 404);
+            return response()->notFound('Admin not found.');
         }
 
         $request->merge([

@@ -19,7 +19,6 @@ class AdminResource extends JsonResource
             "name"=> $this->name,
             "email"=> $this->email,
             "is_active"=> $this->is_active,
-            "access_token"=> $this->access_token,
             "updated_at"=> $this->updated_at,
             "created_at"=> $this->created_at,
         ];

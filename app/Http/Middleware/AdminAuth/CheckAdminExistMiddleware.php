@@ -18,18 +18,14 @@ class CheckAdminExistMiddleware
         $admin = Admin::whereRaw(['email' => ['$regex' => '^' . preg_quote($email) . '$', '$options' => 'i']])->first();
         
         if ($admin) {
-            return response()->json([
-                'message' => 'Admin already exists'
-            ], 409);
+            return response()->error('Admin already exists', 409);
         }
         
         // Check if email already exists in user table (cross-table validation, case-insensitive)
         $user = User::whereRaw(['email' => ['$regex' => '^' . preg_quote($email) . '$', '$options' => 'i']])->first();
         
         if ($user) {
-            return response()->json([
-                'message' => 'Email already registered as a user account. Please use a different email.'
-            ], 409);
+            return response()->error('Email already registered as a user account. Please use a different email.', 409);
         }
 
         return $next($request);

@@ -22,13 +22,18 @@ class ResponseServiceProvider extends ServiceProvider
     {
         // Success response macro
         Response::macro('success', function ($data = null, $message = "Success", $code = 200) {
-
+            
+            if ($data === null) {
+                return Response::json([
+                    'success' => true,
+                    'message' => $message
+                ], $code);
+            }
+            
             return Response::json([
                 'success' => true,
-                'message' => $message,
-                'errors' => null,
-                'data' => $data
-            ], $code);
+                'message' => $message
+            ] + $data, $code);
         });
 
         // Error response macro
