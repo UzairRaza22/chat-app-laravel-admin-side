@@ -21,7 +21,7 @@ class ResponseServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Success response macro
-        Response::macro('success', function ($data = null, $message = "Success", $code = 200) {
+        Response::macro('success', function ($message = "Success", $data = null, $code = 200) {
             
             if ($data === null) {
                 return Response::json([
@@ -32,29 +32,17 @@ class ResponseServiceProvider extends ServiceProvider
             
             return Response::json([
                 'success' => true,
-                'message' => $message
-            ] + $data, $code);
-        });
-
-        // Error response macro
-        Response::macro('error', function ($message = "Error", $code = 400, $errors = []) {
-
-            return Response::json([
-                'success' => false,
                 'message' => $message,
-                'errors' => $errors,
-                'data' => null
+                'data' => $data
             ], $code);
         });
 
         // Validation error response macro
-        Response::macro('validation', function ($errors, $message = "Validation Failed") {
-
+        Response::macro('validationError', function ($message = "Validation Failed", $errors = []) {
             return Response::json([
                 'success' => false,
                 'message' => $message,
-                'errors' => $errors,
-                'data' => null
+                'errors' => $errors
             ], 422);
         });
 

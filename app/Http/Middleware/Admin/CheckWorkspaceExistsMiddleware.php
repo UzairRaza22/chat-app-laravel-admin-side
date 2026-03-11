@@ -14,7 +14,7 @@ class CheckWorkspaceExistsMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $workspaceId = data_get($request, 'workspace_id');
+        $workspaceId = $request->input('workspace_id');
 
         if ($workspaceId) {
             // Validate MongoDB ObjectId format
@@ -29,15 +29,14 @@ class CheckWorkspaceExistsMiddleware
                 return response()->notFound('Workspace not found.');
             }
 
-            $request->merge(['validatedWorkspace' => $workspace]);
+            $request->attributes->set('workspace', $workspace);
         } else {
-            $workspaces = Workspace::with('creator')->get();
-
-            if ($workspaces->isEmpty()) {
-                return response()->notFound('No workspaces found.');
-            }
-
-            $request->merge(['validatedWorkspace' => $workspaces]);
+            // For listing, provide paginated workspaces
+            $workspaces = Workspace::with('creator')
+                ->orderBy('created_at', 'desc')
+                ->paginate($request->input('per_page', 10));
+            
+            $request->attributes->set('workspaces', $workspaces);
         }
 
         return $next($request);

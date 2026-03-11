@@ -14,7 +14,7 @@ class CheckTeamExistsMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $teamId = data_get($request, 'team_id');
+        $teamId = $request->input('team_id');
         
         if ($teamId) {
             // Validate MongoDB ObjectId format
@@ -24,20 +24,20 @@ class CheckTeamExistsMiddleware
                 ]);
             }
             
-            $team = Team::with('creator')->find($teamId);
+            $team = Team::with(['workspace', 'creator'])->find($teamId);
             if (!$team) {
                 return response()->notFound('Team not found.');
             }
             
-            $request->merge(['validatedTeam' => $team]);
+            $request->attributes->set('team', $team);
         } else {
-            $teams = Team::with('creator')->get();
+            // For listing, provide paginated teams with filtering
+            $query = Team::with(['workspace', 'creator'])
+                ->when($request->input('workspace_id'), fn($q, $workspaceId) => $q->where('workspace_id', $workspaceId))
+                ->orderBy('created_at', 'desc');
             
-            if ($teams->isEmpty()) {
-                return response()->notFound('No teams found.');
-            }
-            
-            $request->merge(['validatedTeam' => $teams]);
+            $teams = $query->paginate($request->input('per_page', 10));
+            $request->attributes->set('teams', $teams);
         }
 
         return $next($request);

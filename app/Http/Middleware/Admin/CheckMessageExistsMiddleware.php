@@ -14,7 +14,7 @@ class CheckMessageExistsMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $messageId = data_get($request, 'message_id');
+        $messageId = $request->input('message_id');
         
         if ($messageId) {
             // Validate MongoDB ObjectId format
@@ -24,20 +24,21 @@ class CheckMessageExistsMiddleware
                 ]);
             }
             
-            $message = Message::with('user')->find($messageId);
+            $message = Message::with(['channel', 'sender'])->find($messageId);
             if (!$message) {
                 return response()->notFound('Message not found.');
             }
             
-            $request->merge(['validatedMessage' => $message]);
+            $request->attributes->set('message', $message);
         } else {
-            $messages = Message::with('user')->get();
+            // For listing, provide paginated messages with filtering
+            $query = Message::with(['channel', 'sender'])
+                ->when($request->input('channel_id'), fn($q, $channelId) => $q->where('channel_id', $channelId))
+                ->when($request->input('user_id'), fn($q, $userId) => $q->where('user_id', $userId))
+                ->orderBy('created_at', 'desc');
             
-            if ($messages->isEmpty()) {
-                return response()->notFound('No messages found.');
-            }
-            
-            $request->merge(['validatedMessage' => $messages]);
+            $messages = $query->paginate($request->input('per_page', 10));
+            $request->attributes->set('messages', $messages);
         }
 
         return $next($request);

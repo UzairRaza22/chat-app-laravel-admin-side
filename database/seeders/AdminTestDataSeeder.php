@@ -23,14 +23,15 @@ class AdminTestDataSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Create Users
+        // Create Users with more comprehensive data
         $users = [];
         $users[] = User::create([
             'name' => 'John Doe',
             'email' => 'john@test.com',
             'password' => Hash::make('password123'),
             'is_active' => true,
-            'workspace_ids' => [], // Will be updated after workspaces are created
+            'workspace_ids' => [],
+            'team_ids' => [],
         ]);
 
         $users[] = User::create([
@@ -39,6 +40,7 @@ class AdminTestDataSeeder extends Seeder
             'password' => Hash::make('password123'),
             'is_active' => true,
             'workspace_ids' => [],
+            'team_ids' => [],
         ]);
 
         $users[] = User::create([
@@ -47,82 +49,226 @@ class AdminTestDataSeeder extends Seeder
             'password' => Hash::make('password123'),
             'is_active' => true,
             'workspace_ids' => [],
+            'team_ids' => [],
         ]);
 
         $users[] = User::create([
             'name' => 'Sarah Wilson',
             'email' => 'sarah@test.com',
             'password' => Hash::make('password123'),
-            'is_active' => false, // Inactive user for testing
+            'is_active' => true,
             'workspace_ids' => [],
+            'team_ids' => [],
         ]);
 
-        // Create Workspaces
+        $users[] = User::create([
+            'name' => 'Alex Brown',
+            'email' => 'alex@test.com',
+            'password' => Hash::make('password123'),
+            'is_active' => true,
+            'workspace_ids' => [],
+            'team_ids' => [],
+        ]);
+
+        $users[] = User::create([
+            'name' => 'Emma Davis',
+            'email' => 'emma@test.com',
+            'password' => Hash::make('password123'),
+            'is_active' => false, // Inactive user for testing
+            'workspace_ids' => [],
+            'team_ids' => [],
+        ]);
+
+        // Create Workspaces - Each user creates multiple workspaces
         $workspaces = [];
+        
+        // John's workspaces
         $workspaces[] = Workspace::create([
-            'name' => 'Tech Company Workspace',
-            'description' => 'Main workspace for tech company',
-            'creator_id' => (string)$users[0]->_id,
+            'name' => 'John\'s Tech Startup',
+            'description' => 'Main workspace for John\'s tech startup company',
+            'creator_id' => (string)$admin->_id,
             'user_ids' => [(string)$users[0]->_id, (string)$users[1]->_id, (string)$users[2]->_id],
         ]);
 
         $workspaces[] = Workspace::create([
-            'name' => 'Marketing Team Workspace',
-            'description' => 'Workspace for marketing activities',
-            'creator_id' => (string)$users[1]->_id,
+            'name' => 'John\'s Side Project',
+            'description' => 'Personal side project workspace',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[0]->_id, (string)$users[4]->_id],
+        ]);
+
+        // Jane's workspaces
+        $workspaces[] = Workspace::create([
+            'name' => 'Jane\'s Marketing Agency',
+            'description' => 'Marketing agency workspace managed by Jane',
+            'creator_id' => (string)$admin->_id,
             'user_ids' => [(string)$users[1]->_id, (string)$users[2]->_id, (string)$users[3]->_id],
         ]);
 
         $workspaces[] = Workspace::create([
-            'name' => 'Development Workspace',
-            'description' => 'Workspace for development team',
-            'creator_id' => (string)$users[0]->_id,
-            'user_ids' => [(string)$users[0]->_id, (string)$users[2]->_id],
+            'name' => 'Jane\'s Creative Studio',
+            'description' => 'Creative design and content workspace',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[1]->_id, (string)$users[4]->_id, (string)$users[5]->_id],
+        ]);
+
+        // Mike's workspaces
+        $workspaces[] = Workspace::create([
+            'name' => 'Mike\'s Development Hub',
+            'description' => 'Full-stack development workspace',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[2]->_id, (string)$users[0]->_id, (string)$users[4]->_id],
+        ]);
+
+        // Sarah's workspace
+        $workspaces[] = Workspace::create([
+            'name' => 'Sarah\'s Consulting Firm',
+            'description' => 'Business consulting workspace',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[3]->_id, (string)$users[1]->_id, (string)$users[5]->_id],
+        ]);
+
+        // Alex's workspace
+        $workspaces[] = Workspace::create([
+            'name' => 'Alex\'s Innovation Lab',
+            'description' => 'Research and innovation workspace',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[4]->_id, (string)$users[0]->_id, (string)$users[2]->_id],
         ]);
 
         // Update users with their workspace IDs
-        $users[0]->update(['workspace_ids' => [(string)$workspaces[0]->_id, (string)$workspaces[2]->_id]]);
-        $users[1]->update(['workspace_ids' => [(string)$workspaces[0]->_id, (string)$workspaces[1]->_id]]);
-        $users[2]->update(['workspace_ids' => [(string)$workspaces[0]->_id, (string)$workspaces[1]->_id, (string)$workspaces[2]->_id]]);
-        $users[3]->update(['workspace_ids' => [(string)$workspaces[1]->_id]]);
+        $users[0]->update(['workspace_ids' => [(string)$workspaces[0]->_id, (string)$workspaces[1]->_id, (string)$workspaces[4]->_id, (string)$workspaces[6]->_id]]);
+        $users[1]->update(['workspace_ids' => [(string)$workspaces[0]->_id, (string)$workspaces[2]->_id, (string)$workspaces[3]->_id, (string)$workspaces[5]->_id]]);
+        $users[2]->update(['workspace_ids' => [(string)$workspaces[0]->_id, (string)$workspaces[2]->_id, (string)$workspaces[4]->_id, (string)$workspaces[6]->_id]]);
+        $users[3]->update(['workspace_ids' => [(string)$workspaces[2]->_id, (string)$workspaces[5]->_id]]);
+        $users[4]->update(['workspace_ids' => [(string)$workspaces[1]->_id, (string)$workspaces[3]->_id, (string)$workspaces[4]->_id, (string)$workspaces[6]->_id]]);
+        $users[5]->update(['workspace_ids' => [(string)$workspaces[3]->_id, (string)$workspaces[5]->_id]]);
 
-        // Create Teams
+        // Create Teams - Multiple teams per workspace with different creators
         $teams = [];
+        
+        // Teams for John's Tech Startup
         $teams[] = Team::create([
             'workspace_id' => (string)$workspaces[0]->_id,
-            'name' => 'Frontend Team',
+            'name' => 'Frontend Development',
             'description' => 'Frontend development team',
-            'creator_id' => (string)$users[0]->_id,
+            'creator_id' => (string)$admin->_id,
             'user_ids' => [(string)$users[0]->_id, (string)$users[1]->_id],
             'is_active' => true,
         ]);
 
         $teams[] = Team::create([
             'workspace_id' => (string)$workspaces[0]->_id,
-            'name' => 'Backend Team',
+            'name' => 'Backend Development',
             'description' => 'Backend development team',
-            'creator_id' => (string)$users[0]->_id,
+            'creator_id' => (string)$admin->_id,
             'user_ids' => [(string)$users[0]->_id, (string)$users[2]->_id],
             'is_active' => true,
         ]);
 
         $teams[] = Team::create([
+            'workspace_id' => (string)$workspaces[0]->_id,
+            'name' => 'QA Testing',
+            'description' => 'Quality assurance and testing team',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[1]->_id, (string)$users[2]->_id],
+            'is_active' => true,
+        ]);
+
+        // Teams for John's Side Project
+        $teams[] = Team::create([
             'workspace_id' => (string)$workspaces[1]->_id,
-            'name' => 'Marketing Team',
-            'description' => 'Marketing and promotion team',
-            'creator_id' => (string)$users[1]->_id,
+            'name' => 'Core Development',
+            'description' => 'Core development team for side project',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[0]->_id, (string)$users[4]->_id],
+            'is_active' => true,
+        ]);
+
+        // Teams for Jane's Marketing Agency
+        $teams[] = Team::create([
+            'workspace_id' => (string)$workspaces[2]->_id,
+            'name' => 'Digital Marketing',
+            'description' => 'Digital marketing and social media team',
+            'creator_id' => (string)$admin->_id,
             'user_ids' => [(string)$users[1]->_id, (string)$users[3]->_id],
             'is_active' => true,
         ]);
 
         $teams[] = Team::create([
             'workspace_id' => (string)$workspaces[2]->_id,
+            'name' => 'Content Creation',
+            'description' => 'Content creation and copywriting team',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[1]->_id, (string)$users[2]->_id],
+            'is_active' => true,
+        ]);
+
+        // Teams for Jane's Creative Studio
+        $teams[] = Team::create([
+            'workspace_id' => (string)$workspaces[3]->_id,
+            'name' => 'Design Team',
+            'description' => 'Creative design and UI/UX team',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[1]->_id, (string)$users[4]->_id, (string)$users[5]->_id],
+            'is_active' => true,
+        ]);
+
+        // Teams for Mike's Development Hub
+        $teams[] = Team::create([
+            'workspace_id' => (string)$workspaces[4]->_id,
+            'name' => 'Full Stack Team',
+            'description' => 'Full-stack development team',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[2]->_id, (string)$users[0]->_id, (string)$users[4]->_id],
+            'is_active' => true,
+        ]);
+
+        $teams[] = Team::create([
+            'workspace_id' => (string)$workspaces[4]->_id,
             'name' => 'DevOps Team',
             'description' => 'DevOps and infrastructure team',
-            'creator_id' => (string)$users[0]->_id,
-            'user_ids' => [(string)$users[0]->_id, (string)$users[2]->_id],
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[2]->_id, (string)$users[4]->_id],
+            'is_active' => true,
+        ]);
+
+        // Teams for Sarah's Consulting Firm
+        $teams[] = Team::create([
+            'workspace_id' => (string)$workspaces[5]->_id,
+            'name' => 'Business Strategy',
+            'description' => 'Business strategy and consulting team',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[3]->_id, (string)$users[1]->_id],
+            'is_active' => true,
+        ]);
+
+        // Teams for Alex's Innovation Lab
+        $teams[] = Team::create([
+            'workspace_id' => (string)$workspaces[6]->_id,
+            'name' => 'Research Team',
+            'description' => 'Research and development team',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[4]->_id, (string)$users[0]->_id, (string)$users[2]->_id],
+            'is_active' => true,
+        ]);
+
+        $teams[] = Team::create([
+            'workspace_id' => (string)$workspaces[6]->_id,
+            'name' => 'Innovation Team',
+            'description' => 'Innovation and prototyping team',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$users[4]->_id, (string)$users[2]->_id],
             'is_active' => false, // Inactive team for testing
         ]);
+
+        // Update users with their team IDs
+        $users[0]->update(['team_ids' => [(string)$teams[0]->_id, (string)$teams[1]->_id, (string)$teams[3]->_id, (string)$teams[7]->_id, (string)$teams[10]->_id]]);
+        $users[1]->update(['team_ids' => [(string)$teams[0]->_id, (string)$teams[2]->_id, (string)$teams[4]->_id, (string)$teams[5]->_id, (string)$teams[6]->_id, (string)$teams[9]->_id]]);
+        $users[2]->update(['team_ids' => [(string)$teams[1]->_id, (string)$teams[2]->_id, (string)$teams[5]->_id, (string)$teams[7]->_id, (string)$teams[8]->_id, (string)$teams[10]->_id, (string)$teams[11]->_id]]);
+        $users[3]->update(['team_ids' => [(string)$teams[4]->_id, (string)$teams[9]->_id]]);
+        $users[4]->update(['team_ids' => [(string)$teams[3]->_id, (string)$teams[6]->_id, (string)$teams[7]->_id, (string)$teams[8]->_id, (string)$teams[10]->_id, (string)$teams[11]->_id]]);
+        $users[5]->update(['team_ids' => [(string)$teams[6]->_id]]);
 
         // Create Channels
         $channels = [];

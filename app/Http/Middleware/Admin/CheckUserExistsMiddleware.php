@@ -14,7 +14,7 @@ class CheckUserExistsMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $userId = data_get($request, 'user_id');
+        $userId = $request->input('user_id');
         
         if ($userId) {
             // Validate MongoDB ObjectId format
@@ -29,15 +29,15 @@ class CheckUserExistsMiddleware
                 return response()->notFound('User not found.');
             }
             
-            $request->merge(['validatedUser' => $user]);
+            $request->attributes->set('user', $user);
         } else {
-            $users = User::all();
+            // For listing, provide paginated users with filtering
+            $query = User::when($request->input('workspace_id'), fn($q, $workspaceId) => $q->whereIn('workspace_ids', [$workspaceId]))
+                ->when($request->input('team_id'), fn($q, $teamId) => $q->whereIn('team_ids', [$teamId]))
+                ->orderBy('created_at', 'desc');
             
-            if ($users->isEmpty()) {
-                return response()->notFound('No users found.');
-            }
-            
-            $request->merge(['validatedUser' => $users]);
+            $users = $query->paginate($request->input('per_page', 10));
+            $request->attributes->set('users', $users);
         }
 
         return $next($request);
