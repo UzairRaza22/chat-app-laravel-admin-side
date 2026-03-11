@@ -45,19 +45,7 @@ class CheckAdminValidationMiddleware
             $request->validate(app(AdminResetPasswordRequest::class)->rules());
         }
         
-        // Workspace validation requests (only for POST/PUT/PATCH)
-        // if ($validation_type === 'CreateWorkspaceRequest') {
-        //     $request->validate(app(CreateWorkspaceRequest::class)->rules());
-        // }
-        // if ($validation_type === 'UpdateWorkspaceRequest') {
-        //     $request->validate(app(UpdateWorkspaceRequest::class)->rules());
-        // }
-        // if ($validation_type === 'AddWorkspaceMemberRequest') {
-        //     $request->validate(app(AddWorkspaceMemberRequest::class)->rules());
-        // }
-        // if ($validation_type === 'RemoveWorkspaceMemberRequest') {
-        //     $request->validate(app(RemoveWorkspaceMemberRequest::class)->rules());
-        // }
+       
         
         return $next($request);
     }
