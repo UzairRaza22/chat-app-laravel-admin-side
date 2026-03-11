@@ -32,7 +32,7 @@ class Workspace extends Model
 
     public function creator()
     {
-        return $this->belongsTo(User::class, 'creator_id', '_id');
+        return $this->belongsTo(Admin::class, 'creator_id', '_id');
     }
 
     public function members()

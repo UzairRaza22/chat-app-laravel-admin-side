@@ -24,14 +24,14 @@ class CheckMessageExistsMiddleware
                 ]);
             }
             
-            $message = Message::find($messageId);
+            $message = Message::with('user')->find($messageId);
             if (!$message) {
                 return response()->notFound('Message not found.');
             }
             
             $request->merge(['validatedMessage' => $message]);
         } else {
-            $messages = Message::all();
+            $messages = Message::with('user')->get();
             
             if ($messages->isEmpty()) {
                 return response()->notFound('No messages found.');

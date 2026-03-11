@@ -65,4 +65,20 @@ class Channel extends Model
         $channel->update($data);
         return $channel;
     }
+
+    // Relationships
+    public function creator()
+    {
+        return $this->belongsTo(Admin::class, 'creator_id', '_id');
+    }
+
+    public function workspace()
+    {
+        return $this->belongsTo(Workspace::class, 'workspace_id', '_id');
+    }
+
+    public function team()
+    {
+        return $this->belongsTo(Team::class, 'team_id', '_id');
+    }
 }

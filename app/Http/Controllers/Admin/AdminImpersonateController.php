@@ -56,7 +56,7 @@ class AdminImpersonateController extends Controller
                           ->limit(50)
                           ->get();
 
-        // Calculate statistics
+       
         $statistics = [
             'total_workspaces' => $workspaces->count(),
             'created_workspaces' => $workspaces->where('creator_id', $user->_id)->count(),

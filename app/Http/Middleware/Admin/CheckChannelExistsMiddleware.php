@@ -24,14 +24,14 @@ class CheckChannelExistsMiddleware
                 ]);
             }
             
-            $channel = Channel::find($channelId);
+            $channel = Channel::with('creator')->find($channelId);
             if (!$channel) {
                 return response()->notFound('Channel not found.');
             }
             
             $request->merge(['validatedChannel' => $channel]);
         } else {
-            $channels = Channel::all();
+            $channels = Channel::with('creator')->get();
             
             if ($channels->isEmpty()) {
                 return response()->notFound('No channels found.');

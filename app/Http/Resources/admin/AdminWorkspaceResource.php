@@ -12,7 +12,12 @@ class AdminWorkspaceResource extends JsonResource
             'id' => $this->_id,
             'name' => $this->name,
             'description' => $this->description,
-            'creator_id' => $this->creator?->_id,
+            'creator_id' => $this->creator_id,
+            'creator' => $this->creator ? [
+                'id' => $this->creator->_id,
+                'name' => $this->creator->name,
+                'email' => $this->creator->email,
+            ] : null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
