@@ -18,26 +18,25 @@ class AdminImpersonateController extends Controller
 {
     public function read(ImpersonateReadRequest $request)
     {
-        $user = $request->validatedUser();
+        $user = data_get($request, 'validatedUser');
 
         // Get all related data for the user
-        $relatedData = $this->getUserRelatedData($user);
+        $relatedData = $this->readUserRelatedData($user);
         
-        return response()->json([
-            'success' => true,
-            'message' => 'User impersonation data with related information retrieved successfully!',
-            'data' => [
+        return response()->success(
+            'User impersonation data with related information retrieved successfully!',
+            [
                 'user' => AdminUserResource::make($user),
                 'workspaces' => $relatedData['workspaces'],
                 'teams' => $relatedData['teams'],
                 'channels' => $relatedData['channels'],
                 'messages' => $relatedData['messages'],
                 'statistics' => $relatedData['statistics']
-            ],
-        ]);
+            ]
+        );
     }
 
-    private function getUserRelatedData($user)
+    private function readUserRelatedData($user)
     {
         // Get workspaces where user is a member or creator
         $workspaces = Workspace::where(function($query) use ($user) {
@@ -82,9 +81,6 @@ class AdminImpersonateController extends Controller
         // Clear any impersonation session data
         session()->forget('impersonated_user_id');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Impersonation stopped successfully!',
-        ]);
+        return response()->success('Impersonation stopped successfully!');
     }
 }

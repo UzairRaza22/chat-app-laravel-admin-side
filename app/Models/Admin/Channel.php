@@ -32,7 +32,6 @@ class Channel extends Model
     protected function casts(): array
     {
         return [
-            'user_ids' => 'array',
             'is_active' => 'boolean',
             'deleted_at' => 'datetime',
         ];

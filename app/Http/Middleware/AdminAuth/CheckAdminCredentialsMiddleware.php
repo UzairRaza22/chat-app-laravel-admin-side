@@ -26,6 +26,15 @@ class CheckAdminCredentialsMiddleware
             return response()->unauthorized('Invalid credentials');
         }
 
+        if (!Hash::check($password, $admin->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials. Password incorrect.'
+            ], 401);
+        }
+
+        $request->merge(['user' => $admin]);
+        
         $request->setUserResolver(function () use ($admin) {
             return $admin;
         });

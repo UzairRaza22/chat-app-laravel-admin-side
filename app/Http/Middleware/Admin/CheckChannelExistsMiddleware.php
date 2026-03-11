@@ -9,16 +9,35 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckChannelExistsMiddleware
 {
+    /**
+     * Handle an incoming request.
+     */
     public function handle(Request $request, Closure $next): Response
     {
-        // Get channel_id from query parameters, not route parameters
-        $channelId = $request->query('channel_id') ?? $request->input('channel_id');
-
-        if ($channelId && !Channel::find($channelId)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Channel not found.'
-            ], 404);
+        $channelId = data_get($request, 'channel_id');
+        
+        if ($channelId) {
+            // Validate MongoDB ObjectId format
+            if (!preg_match('/^[0-9a-fA-F]{24}$/', $channelId)) {
+                return response()->validationError('Validation failed', [
+                    'channel_id' => ['The channel id format is invalid.']
+                ]);
+            }
+            
+            $channel = Channel::find($channelId);
+            if (!$channel) {
+                return response()->notFound('Channel not found.');
+            }
+            
+            $request->merge(['validatedChannel' => $channel]);
+        } else {
+            $channels = Channel::all();
+            
+            if ($channels->isEmpty()) {
+                return response()->notFound('No channels found.');
+            }
+            
+            $request->merge(['validatedChannel' => $channels]);
         }
 
         return $next($request);

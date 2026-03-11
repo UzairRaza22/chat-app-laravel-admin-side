@@ -15,7 +15,7 @@ class ImpersonateStopRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // No extra input needed
+            
         ];
     }
 }

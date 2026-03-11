@@ -10,14 +10,11 @@ class AdminChannelController extends Controller
 {
     public function read(ChannelReadRequest $request)
     {
-        $channels = $request->validatedChannel();
+        $channels = data_get($request, 'validatedChannel');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Channel(s) retrieved successfully!',
-            'data' => $channels instanceof \Illuminate\Database\Eloquent\Collection
-                ? AdminChannelResource::collection($channels)
-                : AdminChannelResource::make($channels),
-        ]);
+        return response()->success(
+            'Channel(s) retrieved successfully!',
+            AdminChannelResource::collection(collect($channels))
+        );
     }
 }

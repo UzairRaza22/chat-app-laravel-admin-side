@@ -3,7 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\AdminResource;
-use Illuminate\Http\Request;
+use App\Http\Requests\AdminAuth\AdminSignupRequest;
+use App\Http\Requests\AdminAuth\AdminVerifySignupRequest;
+use App\Http\Requests\AdminAuth\AdminLoginRequest;
+use App\Http\Requests\AdminAuth\AdminLogoutRequest;
+use App\Http\Requests\AdminAuth\AdminForgotPasswordRequest;
+use App\Http\Requests\AdminAuth\AdminResetPasswordRequest;
 use App\Models\Admin\Admin;
 use App\Models\Admin\AdminSessionToken;
 use App\Models\Admin\AdminForgetToken;
@@ -21,17 +26,16 @@ class AdminAuthController extends Controller
     {
         $admin = Admin::add($request);
 
-        $workspace = $admin->createdWorkspaces()->create([
+        $workspace = Workspace::create([
             'name' => data_get($request, 'workspace'),
             'description' => 'Default workspace',
+            'creator_id' => (string)$admin->_id,
+            'user_ids' => [(string)$admin->_id],
         ]);
-
-        $workspace->members()->attach($admin->_id);
-
 
         $token = AdminSessionToken::generate('admin_signup_verification_token', $admin);
 
-        Mail::to($request->email)->send(new SignupVerificationEmail($admin,$token));
+        Mail::to(data_get($request, 'email'))->send(new SignupVerificationEmail($admin, $token));
 
         return response()->success([
             'admin' => AdminResource::make($admin)
@@ -43,8 +47,8 @@ class AdminAuthController extends Controller
      */
     public function verifySignup(Request $request)
     {
-        $admin = $request->verified_admin;
-        $tokenRecord = $request->token_record;
+        $admin = data_get($request, 'verified_admin');
+        $tokenRecord = data_get($request, 'token_record');
 
         // Activate the Admin
         $admin->update([
@@ -64,7 +68,7 @@ class AdminAuthController extends Controller
      */
     public function login(Request $request)
     {
-        $admin = $request->user();
+        $admin = data_get($request, 'user');
 
         $token = AdminSessionToken::generate('admin_login_token', $admin);
         
@@ -80,10 +84,10 @@ class AdminAuthController extends Controller
     /**
      * Admin logout
      */
-    public function logout(Request $request)
+    public function logout(AdminLogoutRequest $request)
     {
         $tokenRecord = data_get($request, 'token_record');
-        $admin = $request->user();
+        $admin = data_get($request, 'user');
         
         // Clear access_token from Admin model
         $admin->update(['access_token' => null]);
@@ -96,9 +100,9 @@ class AdminAuthController extends Controller
     /**
      * Admin forgot password
      */
-    public function forgotPassword(Request $request)
+    public function forgotPassword(AdminForgotPasswordRequest $request)
     {
-        $admin = $request->admin;
+        $admin = data_get($request, 'admin');
 
         $token = AdminForgetToken::generate('admin_forgot_password_token', $admin);
         
@@ -110,14 +114,14 @@ class AdminAuthController extends Controller
     /**
      * Admin reset password
      */
-    public function resetPassword(Request $request)
+    public function resetPassword(AdminResetPasswordRequest $request)
     {
         $tokenRecord = data_get($request, 'token_record');
 
         $admin = Admin::find($tokenRecord->admin_id);
 
         $admin->update([
-            'password' => $request->password
+            'password' => data_get($request, 'password')
         ]);
 
         $tokenRecord->delete();

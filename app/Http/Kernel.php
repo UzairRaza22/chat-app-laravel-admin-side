@@ -56,5 +56,21 @@ class Kernel extends HttpKernel
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        
+        // Admin Authentication Middleware
+        'check.admin.auth' => \App\Http\Middleware\AdminAuth\CheckAdminTokenMiddleware::class . ':admin_login_token',
+        'check.admin.token' => \App\Http\Middleware\AdminAuth\CheckAdminTokenMiddleware::class,
+        'check.admin.exists' => \App\Http\Middleware\AdminAuth\CheckAdminExistMiddleware::class,
+        'check.admin.exists.forgot' => \App\Http\Middleware\AdminAuth\CheckAdminExistForForgotMiddleware::class,
+        'check.admin.credentials' => \App\Http\Middleware\AdminAuth\CheckAdminCredentialsMiddleware::class,
+        'check.admin.active' => \App\Http\Middleware\AdminAuth\CheckAdminActiveMiddleware::class,
+        
+        // Admin Resource Validation Middleware
+        'check.workspace.exists' => \App\Http\Middleware\Admin\CheckWorkspaceExistsMiddleware::class,
+        'check.team.exists' => \App\Http\Middleware\Admin\CheckTeamExistsMiddleware::class,
+        'check.channel.exists' => \App\Http\Middleware\Admin\CheckChannelExistsMiddleware::class,
+        'check.message.exists' => \App\Http\Middleware\Admin\CheckMessageExistsMiddleware::class,
+        'check.user.exists' => \App\Http\Middleware\Admin\CheckUserExistsMiddleware::class,
+        'check.user.exists.impersonate' => \App\Http\Middleware\Admin\CheckUserExistsForImpersonationMiddleware::class,
     ];
 }

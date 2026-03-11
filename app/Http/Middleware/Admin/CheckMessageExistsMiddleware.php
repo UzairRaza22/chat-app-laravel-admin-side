@@ -9,16 +9,35 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckMessageExistsMiddleware
 {
+    /**
+     * Handle an incoming request.
+     */
     public function handle(Request $request, Closure $next): Response
     {
-        // Get message_id from query parameters, not route parameters
-        $messageId = $request->query('message_id') ?? $request->input('message_id');
-
-        if ($messageId && !Message::find($messageId)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Message not found.'
-            ], 404);
+        $messageId = data_get($request, 'message_id');
+        
+        if ($messageId) {
+            // Validate MongoDB ObjectId format
+            if (!preg_match('/^[0-9a-fA-F]{24}$/', $messageId)) {
+                return response()->validationError('Validation failed', [
+                    'message_id' => ['The message id format is invalid.']
+                ]);
+            }
+            
+            $message = Message::find($messageId);
+            if (!$message) {
+                return response()->notFound('Message not found.');
+            }
+            
+            $request->merge(['validatedMessage' => $message]);
+        } else {
+            $messages = Message::all();
+            
+            if ($messages->isEmpty()) {
+                return response()->notFound('No messages found.');
+            }
+            
+            $request->merge(['validatedMessage' => $messages]);
         }
 
         return $next($request);

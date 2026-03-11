@@ -4,33 +4,37 @@ namespace App\Http\Middleware\Admin;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use App\Models\Admin\User;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckUserExistsForImpersonationMiddleware
 {
+    /**
+     * Handle an incoming request.
+     */
     public function handle(Request $request, Closure $next): Response
     {
-        // Get user_id from query parameters, not route parameters
-        $userId = $request->query('user_id') ?? $request->input('user_id');
+        $userId = data_get($request, 'user_id');
         
         if (!$userId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User ID is required.'
-            ], 400);
+            return response()->validationError('Validation failed', [
+                'user_id' => ['The user id field is required for impersonation.']
+            ]);
+        }
+        
+        // Validate MongoDB ObjectId format
+        if (!preg_match('/^[0-9a-fA-F]{24}$/', $userId)) {
+            return response()->validationError('Validation failed', [
+                'user_id' => ['The user id format is invalid.']
+            ]);
         }
         
         $user = User::find($userId);
-
         if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not found.'
-            ], 404);
+            return response()->notFound('User not found for impersonation.');
         }
-
-        $request->merge(['impersonate_user' => $user]);
+        
+        $request->merge(['validatedUser' => $user]);
 
         return $next($request);
     }

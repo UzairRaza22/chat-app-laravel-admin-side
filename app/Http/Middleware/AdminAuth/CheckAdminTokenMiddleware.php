@@ -18,9 +18,6 @@ class CheckAdminTokenMiddleware
      */
     public function handle(Request $request, Closure $next, $tokenType = null): Response
     {
-        // Debug: Log what token type we received
-        \Log::info('CheckAdminTokenMiddleware called with tokenType: ' . $tokenType . "'");
-        
         // For signup verification, check if email exists first
         if ($tokenType === 'admin_signup_verification_token') {
             $email = $request->email;
@@ -31,16 +28,24 @@ class CheckAdminTokenMiddleware
             }
         }
 
-        // Get token from route, header, or request body
-        $token = $request->route('token') ?? 
-                 $request->headers->get('authorization') ?? 
-                 $request->input('token');
+        // Get token from Authorization header, route parameter, or request body
+        $token = null;
         
-        // Remove 'Bearer ' prefix if present
-        $token = str_replace('Bearer ', '', $token);
+        // First try Authorization header (Bearer token)
+        $authHeader = $request->headers->get('authorization');
+        if ($authHeader && str_starts_with($authHeader, 'Bearer ')) {
+            $token = substr($authHeader, 7); // Remove 'Bearer ' prefix
+        }
         
-        // Debug: Log what token we received
-        \Log::info('CheckAdminTokenMiddleware extracted token: ' . $token . "'");
+        // If no header token, try route parameter
+        if (!$token) {
+            $token = $request->route('token');
+        }
+        
+        // If no route token, try request body
+        if (!$token) {
+            $token = $request->input('token');
+        }
         
         if (!$token) {
             return response()->unauthorized('Token is required.');
@@ -54,28 +59,12 @@ class CheckAdminTokenMiddleware
         if ($tokenType === 'admin_login_token' || $tokenType === 'admin_signup_verification_token') {
             $tokenRecord = AdminSessionToken::findValidToken($token, $tokenType);
         } elseif ($tokenType === 'admin_forgot_password_token') {
-            // Debug: Log the token being searched
-            \Log::info('Searching for forgot password token: ' . $token);
-            \Log::info('Token type: ' . $tokenType);
-            \Log::info('Hashed token: ' . hash('sha256', $token));
-            
             // First try with forgot password token type
             $tokenRecord = AdminForgetToken::findValidToken($token, $tokenType);
             
             // If not found, try with login token type (in case user provided login token)
             if (!$tokenRecord) {
-                \Log::info('Trying with admin_login_token type');
                 $tokenRecord = AdminSessionToken::findValidToken($token, 'admin_login_token');
-                if ($tokenRecord) {
-                    \Log::info('Found token with admin_login_token type');
-                }
-            }
-            
-            // Debug: Log if token was found
-            \Log::info('Token record found: ' . ($tokenRecord ? 'Yes' : 'No'));
-            if ($tokenRecord) {
-                \Log::info('Token record admin_id: ' . $tokenRecord->admin_id);
-                \Log::info('Token record type: ' . ($tokenRecord->token_type ?? 'N/A'));
             }
         } else {
             return response()->unauthorized('Invalid token type.');
@@ -101,9 +90,18 @@ class CheckAdminTokenMiddleware
             return response()->notFound('Admin not found.');
         }
 
+        // Check if admin is active
+        if (!$admin->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Admin account is inactive. Please verify your email first.'
+            ], 403);
+        }
+
         $request->merge([
             'token_record' => $tokenRecord,
-            'verified_admin' => $admin
+            'verified_admin' => $admin,
+            'user' => $admin  // Add this for compatibility
         ]);
 
         // Set admin in user resolver so $request->user() works

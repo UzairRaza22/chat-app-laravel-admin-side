@@ -30,7 +30,6 @@ class Team extends Model
     {
         return [
             'is_active' => 'boolean',
-            'user_ids' => 'array',
             'deleted_at' => 'datetime',
         ];
     }

@@ -26,7 +26,6 @@ class Workspace extends Model
     protected function casts(): array
     {
         return [
-            'user_ids' => 'array',
             'deleted_at' => 'datetime',
         ];
     }

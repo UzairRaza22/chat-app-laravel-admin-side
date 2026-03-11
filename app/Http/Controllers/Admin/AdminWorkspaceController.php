@@ -10,14 +10,11 @@ class AdminWorkspaceController extends Controller
 {
     public function read(WorkspaceReadRequest $request)
     {
-        $workspaces = $request->validatedWorkspace();
+        $workspaces = data_get($request, 'validatedWorkspace');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Workspace(s) retrieved successfully!',
-            'data' => $workspaces instanceof \Illuminate\Database\Eloquent\Collection
-                ? AdminWorkspaceResource::collection($workspaces)
-                : AdminWorkspaceResource::make($workspaces),
-        ]);
+        return response()->success(
+            'Workspace(s) retrieved successfully!',
+            AdminWorkspaceResource::collection(collect($workspaces))
+        );
     }
 }
