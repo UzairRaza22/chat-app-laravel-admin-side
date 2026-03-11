@@ -75,4 +75,25 @@ class Message extends Model
         $message->update($data);
         return $message;
     }
+
+    // Relationships
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'user_id', '_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', '_id');
+    }
+
+    public function channel()
+    {
+        return $this->belongsTo(Channel::class, 'channel_id', '_id');
+    }
+
+    public function workspace()
+    {
+        return $this->belongsTo(Workspace::class, 'workspace_id', '_id');
+    }
 }

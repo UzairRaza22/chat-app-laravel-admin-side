@@ -103,8 +103,8 @@ class CheckAdminTokenMiddleware
             ], 404);
         }
 
-        // Check if admin is active
-        if (!$admin->is_active) {
+        // Check if admin is active (skip for verification tokens)
+        if (!$admin->is_active && $tokenType !== 'admin_signup_verification_token') {
             return response()->json([
                 'success' => false,
                 'message' => 'Admin account is inactive. Please verify your email first.'

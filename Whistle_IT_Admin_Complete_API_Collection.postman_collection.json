@@ -8,14 +8,7 @@
 		"_collection_link": "https://go.postman.co/collection/whistle-admin-complete-api"
 	},
 	"auth": {
-		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{admin_access_token}}",
-				"type": "string"
-			}
-		]
+		"type": "noauth"
 	},
 	"event": [
 		{
@@ -34,8 +27,14 @@
 					"",
 					"// Auto-add token for protected routes",
 					"const requestName = pm.info.requestName;",
-					"const isAuthEndpoint = requestName.includes('Sign-Up') || requestName.includes('Verify-Email') || requestName.includes('Login') || requestName.includes('Forget-Password') || requestName.includes('Reset-Password');",
+					"const isAuthEndpoint = requestName.includes('Sign-Up') || requestName.includes('Verify-Email') || requestName.includes('Login') || requestName.includes('Forget-Password') || requestName.includes('Reset-Password') || requestName.includes('Debug-Verify');",
 					"const isFailureTest = requestName.includes('Invalid') || requestName.includes('Empty') || requestName.includes('Missing') || requestName.includes('Unauthorized');",
+					"",
+					"// Special handling for verification endpoints - remove any Authorization header",
+					"if (requestName.includes('Verify-Email') || requestName.includes('Debug-Verify')) {",
+					"    pm.request.headers.remove('Authorization');",
+					"    console.log('🔧 Removed Authorization header for verification endpoint');",
+					"}",
 					"",
 					"if (!isAuthEndpoint && !isFailureTest) {",
 					"    const accessToken = pm.environment.get('admin_access_token');",
@@ -215,7 +214,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"token\": \"{{admin_verification_token}}\"\n}"
+									"raw": "{\n    \"email\": \"{{test_admin_email}}\",\n    \"token\": \"{{admin_verification_token}}\"\n}"
 								},
 								"url": {
 									"raw": "{{baseURL}}/api/admin/auth/verify-signup",
@@ -383,6 +382,51 @@
 									"raw": "{{baseURL}}/api/admin/auth/reset-password",
 									"host": ["{{baseURL}}"],
 									"path": ["api", "admin", "auth", "reset-password"]
+								}
+							}
+						},
+						{
+							"name": "🔍 Debug-Verify-Token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Debug response received', function () {",
+											"    pm.response.to.be.json;",
+											"    const jsonData = pm.response.json();",
+											"    console.log('🔍 Debug Response:', JSON.stringify(jsonData, null, 2));",
+											"    ",
+											"    if (jsonData.success) {",
+											"        console.log('✅ Token is valid - verification should work!');",
+											"    } else {",
+											"        console.log('❌ Issue found:', jsonData.message);",
+											"        if (jsonData.debug) {",
+											"            console.log('🔧 Debug info:', JSON.stringify(jsonData.debug, null, 2));",
+											"        }",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"{{test_admin_email}}\",\n    \"token\": \"{{admin_verification_token}}\"\n}"
+								},
+								"url": {
+									"raw": "{{baseURL}}/api/admin/auth/debug-verify",
+									"host": ["{{baseURL}}"],
+									"path": ["api", "admin", "auth", "debug-verify"]
 								}
 							}
 						},
@@ -583,7 +627,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"token\": \"invalid_verification_token_12345\"\n}"
+									"raw": "{\n    \"email\": \"test@example.com\",\n    \"token\": \"invalid_verification_token_12345\"\n}"
 								},
 								"url": {
 									"raw": "{{baseURL}}/api/admin/auth/verify-signup",

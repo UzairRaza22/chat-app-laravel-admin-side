@@ -59,4 +59,15 @@ class Team extends Model
         $team->update($data);
         return $team;
     }
+
+    // Relationships
+    public function creator()
+    {
+        return $this->belongsTo(Admin::class, 'creator_id', '_id');
+    }
+
+    public function workspace()
+    {
+        return $this->belongsTo(Workspace::class, 'workspace_id', '_id');
+    }
 }

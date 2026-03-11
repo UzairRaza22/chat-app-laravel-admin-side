@@ -24,14 +24,14 @@ class CheckTeamExistsMiddleware
                 ]);
             }
             
-            $team = Team::find($teamId);
+            $team = Team::with('creator')->find($teamId);
             if (!$team) {
                 return response()->notFound('Team not found.');
             }
             
             $request->merge(['validatedTeam' => $team]);
         } else {
-            $teams = Team::all();
+            $teams = Team::with('creator')->get();
             
             if ($teams->isEmpty()) {
                 return response()->notFound('No teams found.');
