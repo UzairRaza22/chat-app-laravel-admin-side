@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Channel extends Model
 {
     use HasFactory, SoftDeletes;
-    
+
     protected $collection = 'channels';
 
     protected $fillable = [
@@ -17,9 +17,9 @@ class Channel extends Model
         'description',
         'workspace_id',
         'team_id',
-        'type', // public/private/direct
+        'type', # public/private/direct
         'creator_id',
-        'user_ids', // array of user IDs
+        'user_ids', # array of user IDs
         'is_active',
     ];
 
@@ -35,6 +35,38 @@ class Channel extends Model
             'is_active' => 'boolean',
             'deleted_at' => 'datetime',
         ];
+    }
+
+    public static function addFilters($request, $query, bool $allowStatus = false)
+    {
+        if ($id = data_get($request, 'channel_id')) {
+            $query->where('_id', $id);
+        }
+
+        if ($teamId = data_get($request, 'team_id')) {
+            $query->where('team_id', $teamId);
+        }
+
+        if ($workspaceId = data_get($request, 'workspace_id')) {
+            $query->whereHas('team', fn($subQ) => $subQ->where('workspace_id', $workspaceId));
+        }
+
+        if ($allowStatus && ($status = data_get($request, 'status'))) {
+            $query->where('is_active', $status == 'active' ? true : false);
+        }
+
+        if ($search = data_get($request, 'search')) {
+            $searchTerm = trim($search);
+            $safeSearch = preg_quote($searchTerm);
+            $query->where(function ($q) use ($safeSearch) {
+                $q->where('name', 'regex', "/{$safeSearch}/i")
+                    ->orWhere('description', 'regex', "/{$safeSearch}/i");
+            });
+        }
+
+        $sortBy = data_get($request, 'sort_by', 'created_at');
+        $sortOrder = data_get($request, 'sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
     }
 
     public static function add($data)
@@ -55,7 +87,7 @@ class Channel extends Model
     {
         $channel = data_get($request, 'channel');
         $data = [];
-        
+
         if ($request->has('name')) $data['name'] = $request->name;
         if ($request->has('description')) $data['description'] = $request->description;
         if ($request->has('type')) $data['type'] = $request->type;

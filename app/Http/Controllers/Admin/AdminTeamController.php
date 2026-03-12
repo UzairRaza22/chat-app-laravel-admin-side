@@ -3,16 +3,29 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\TeamReadRequest;
+use Illuminate\Http\Request;
+use App\Models\Admin\Team;
 use App\Http\Resources\admin\AdminTeamResource;
-use App\Http\Resources\admin\AdminTeamCollection;
 
 class AdminTeamController extends Controller
 {
-    public function read(TeamReadRequest $request)
+    public function read(Request $request)
     {
-        return $request->input('team_id')
-            ? new AdminTeamResource(data_get($request->attributes->all(), 'team'))
-            : new AdminTeamCollection(data_get($request->attributes->all(), 'teams'));
+        $query = Team::with(['workspace', 'creator']);
+
+        Team::addFilters($request, $query, true);
+
+        $perPage = data_get($request, 'per_page', 10);
+        $teams = $query->paginate($perPage);
+
+        return response()->success([
+            'teams' => AdminTeamResource::collection($teams),
+            'pagination' => [
+                'total' => $teams->total(),
+                'per_page' => $teams->perPage(),
+                'current_page' => $teams->currentPage(),
+                'last_page' => $teams->lastPage(),
+            ]
+        ]);
     }
 }
