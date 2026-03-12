@@ -8,7 +8,7 @@ class AdminReadRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Middleware will enforce admin
+        return true; # Middleware will enforce admin
     }
 
     public function rules(): array

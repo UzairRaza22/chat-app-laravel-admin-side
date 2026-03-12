@@ -3,16 +3,30 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\WorkspaceReadRequest;
+use Illuminate\Http\Request;
+use App\Models\Admin\Workspace;
 use App\Http\Resources\admin\AdminWorkspaceResource;
-use App\Http\Resources\admin\AdminWorkspaceCollection;
+
 
 class AdminWorkspaceController extends Controller
 {
-    public function read(WorkspaceReadRequest $request)
+    public function read(Request $request)
     {
-        return $request->input('workspace_id')
-            ? new AdminWorkspaceResource(data_get($request->attributes->all(), 'workspace'))
-            : new AdminWorkspaceCollection(data_get($request->attributes->all(), 'workspaces'));
+        $query = Workspace::with('creator');
+
+        Workspace::addFilters($request, $query);
+
+        $perPage = data_get($request, 'per_page', 10);
+        $workspaces = $query->paginate($perPage);
+
+        return response()->success([
+            'workspaces' => AdminWorkspaceResource::collection($workspaces),
+            'pagination' => [
+                'total' => $workspaces->total(),
+                'per_page' => $workspaces->perPage(),
+                'current_page' => $workspaces->currentPage(),
+                'last_page' => $workspaces->lastPage(),
+            ]
+        ]);
     }
 }

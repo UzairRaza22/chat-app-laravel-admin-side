@@ -15,7 +15,7 @@ class AdminTokenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'token' => 'required|string|size:42', // assuming your token length is 42 chars
+            'token' => 'required|string|size:42', # assuming your token length is 42 chars
         ];
     }
 

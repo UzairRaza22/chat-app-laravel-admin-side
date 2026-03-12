@@ -21,35 +21,19 @@ return Application::configure(basePath: dirname(__DIR__))
 
             // Admin authentication middlewares
             'check.admin.validation' => \App\Http\Middleware\CheckAdminValidationMiddleware::class,
+            'check.admin.read.validation' => \App\Http\Middleware\CheckAdminReadValidationMiddleware::class,
             'check.admin.token' => \App\Http\Middleware\AdminAuth\CheckAdminTokenMiddleware::class,
             'check.admin.exists' => \App\Http\Middleware\AdminAuth\CheckAdminExistMiddleware::class,
             'check.admin.credentials' => \App\Http\Middleware\AdminAuth\CheckAdminCredentialsMiddleware::class,
             'check.admin.active' => \App\Http\Middleware\AdminAuth\CheckAdminActiveMiddleware::class,
             'check.admin.exists.forgot' => \App\Http\Middleware\AdminAuth\CheckAdminExistForForgotMiddleware::class,
 
-            'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
-            'workspace.access' => \App\Http\Middleware\CheckWorkspaceAccess::class,
-            'workspace.ownership' => \App\Http\Middleware\CheckWorkspaceOwnership::class,
-            'team.access' => \App\Http\Middleware\CheckTeamAccess::class,
-            'team.ownership' => \App\Http\Middleware\CheckTeamOwnership::class,
-            'channel.access' => \App\Http\Middleware\CheckChannelAccess::class,
-            'channel.ownership' => \App\Http\Middleware\CheckChannelOwnership::class,
-            'api.token' => \App\Http\Middleware\ApiTokenAuth::class,
-            'workspace.unique.name' => \App\Http\Middleware\Workspace\CheckUniqueWorkspaceNameMiddleware::class,
-            'workspace.creator' => \App\Http\Middleware\Workspace\CheckWorkspaceCreatorMiddleware::class,
-            'workspace.exists' => \App\Http\Middleware\Workspace\CheckWorkspaceExistsMiddleware::class,
-            'workspaces.exist' => \App\Http\Middleware\Workspace\CheckWorkspacesExistMiddleware::class,
         
             // Admin read operations middleware - uses admin login token for authentication
             'check.admin.auth' => \App\Http\Middleware\AdminAuth\CheckAdminTokenMiddleware::class . ':admin_login_token',
 
             // Admin resource existence validation middleware
-            'check.workspace.exists' => \App\Http\Middleware\Admin\CheckWorkspaceExistsMiddleware::class,
-            'check.channel.exists' => \App\Http\Middleware\Admin\CheckChannelExistsMiddleware::class,
-            'check.team.exists' => \App\Http\Middleware\Admin\CheckTeamExistsMiddleware::class,
-            'check.message.exists' => \App\Http\Middleware\Admin\CheckMessageExistsMiddleware::class,
-            'check.user.exists' => \App\Http\Middleware\Admin\CheckUserExistsMiddleware::class,
-            'check.user.exists.impersonate' => \App\Http\Middleware\Admin\CheckUserExistsForImpersonationMiddleware::class,
+            // (Replaced by check.admin.read.validation)
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -5,15 +5,15 @@ use App\Http\Controllers\Admin\AdminImpersonateController;
 
 // Admin Start Impersonation (requires user validation)
 Route::middleware([
-    'check.admin.auth',                  // Admin token authentication
-    'check.user.exists.impersonate'     // Check if user exists for impersonation
+    'check.admin.auth',
+    'check.admin.read.validation:impersonate_read_request'
 ])->group(function () {
     Route::get('/read', [AdminImpersonateController::class, 'read']);
 });
 
-// Admin Stop Impersonation (only needs admin auth)
+# Admin Stop Impersonation
 Route::middleware([
-    'check.admin.auth'                   // Only admin token authentication needed
+    'check.admin.auth'                  
 ])->group(function () {
     Route::post('/stop', [AdminImpersonateController::class, 'stop']);
 });

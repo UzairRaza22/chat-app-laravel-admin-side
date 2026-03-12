@@ -39,13 +39,5 @@ Route::prefix('auth')->group(function () {
         'check.admin.token:admin_login_token',
     ]);
 
-    // Test token endpoint for debugging
-    Route::get('/test-token', function () {
-        return response()->success('Token is valid!', [
-            'admin' => request()->user(),
-            'timestamp' => now()->toISOString()
-        ]);
-    })->middleware([
-        'check.admin.auth',
-    ]);
+   
 });

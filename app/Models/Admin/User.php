@@ -58,6 +58,38 @@ class User extends Model
         return $this->belongsToMany(Team::class, null, 'user_ids', 'team_ids');
     }
 
+    public static function addFilters($request, $query, bool $allowStatus = false)
+    {
+        if ($id = data_get($request, 'user_id')) {
+            $query->where('_id', $id);
+        }
+        
+        if ($workspaceId = data_get($request, 'workspace_id')) {
+            $query->whereIn('workspace_ids', [$workspaceId]);
+        }
+
+        if ($teamId = data_get($request, 'team_id')) {
+            $query->whereIn('team_ids', [$teamId]);
+        }
+
+        if ($allowStatus && ($status = data_get($request, 'status'))) {
+            $query->where('is_active', $status == 'active' ? true : false);
+        }
+
+        if ($search = data_get($request, 'search')) {
+            $searchTerm = trim($search);
+            $safeSearch = preg_quote($searchTerm);
+            $query->where(function ($q) use ($safeSearch) {
+                $q->where('name', 'regex', "/{$safeSearch}/i")
+                    ->orWhere('email', 'regex', "/{$safeSearch}/i");
+            });
+        }
+
+        $sortBy = data_get($request, 'sort_by', 'created_at');
+        $sortOrder = data_get($request, 'sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+    }
+
     public static function add($data)
     {
         return self::create([

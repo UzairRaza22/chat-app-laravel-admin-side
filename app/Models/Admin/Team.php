@@ -34,6 +34,34 @@ class Team extends Model
         ];
     }
 
+    public static function addFilters($request, $query, bool $allowStatus = false)
+    {
+        if ($id = data_get($request, 'team_id')) {
+            $query->where('_id', $id);
+        }
+
+        if ($workspaceId = data_get($request, 'workspace_id')) {
+            $query->where('workspace_id', $workspaceId);
+        }
+
+        if ($allowStatus && ($status = data_get($request, 'status'))) {
+            $query->where('is_active', $status == 'active' ? true : false);
+        }
+
+        if ($search = data_get($request, 'search')) {
+            $searchTerm = trim($search);
+            $safeSearch = preg_quote($searchTerm);
+            $query->where(function ($q) use ($safeSearch) {
+                $q->where('name', 'regex', "/{$safeSearch}/i")
+                    ->orWhere('description', 'regex', "/{$safeSearch}/i");
+            });
+        }
+
+        $sortBy = data_get($request, 'sort_by', 'created_at');
+        $sortOrder = data_get($request, 'sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+    }
+
     public static function add($data)
     {
         return self::create([
