@@ -45,8 +45,6 @@ class CheckAdminValidationMiddleware
             $request->validate(app(AdminResetPasswordRequest::class)->rules());
         }
         
-       
-        
         return $next($request);
     }
 }

@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Requests\AdminAuth;
-
 use Illuminate\Foundation\Http\FormRequest;
 
 class AdminForgotPasswordRequest extends FormRequest
