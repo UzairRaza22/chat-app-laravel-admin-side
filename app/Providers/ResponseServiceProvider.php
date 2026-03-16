@@ -5,6 +5,17 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Response;
 
+/**
+ * Response Service Provider
+ *
+ * Registers custom response macros for consistent API responses
+ *
+ * @method \Illuminate\Http\JsonResponse success(string $message = "Success", mixed $data = null, int $code = 200)
+ * @method \Illuminate\Http\JsonResponse validationError(string $message = "Validation Failed", array $errors = [])
+ * @method \Illuminate\Http\JsonResponse unauthorized(string $message = "Unauthorized")
+ * @method \Illuminate\Http\JsonResponse forbidden(string $message = "Forbidden")
+ * @method \Illuminate\Http\JsonResponse notFound(string $message = "Resource Not Found")
+ */
 class ResponseServiceProvider extends ServiceProvider
 {
     /**
@@ -22,14 +33,14 @@ class ResponseServiceProvider extends ServiceProvider
     {
         // Success response macro
         Response::macro('success', function ($message = "Success", $data = null, $code = 200) {
-            
+
             if ($data === null) {
                 return Response::json([
                     'success' => true,
                     'message' => $message
                 ], $code);
             }
-            
+
             return Response::json([
                 'success' => true,
                 'message' => $message,
