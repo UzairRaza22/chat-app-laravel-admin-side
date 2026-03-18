@@ -17,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function () {
-            // API Routes Group with Throttling (30 requests per minute)
+            # API Routes Group with Throttling (30 requests per minute)
             Route::middleware(['api', 'throttle:30,1'])
                 ->prefix('api')
                 ->name('api.')
@@ -121,7 +121,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     return response()->validationError('Validation failed', $e->errors());
                 }
 
-                // Let ResponseServiceProvider handle other exceptions
+              
             }
             return null;
         });

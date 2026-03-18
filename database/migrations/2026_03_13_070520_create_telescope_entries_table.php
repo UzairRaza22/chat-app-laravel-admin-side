@@ -6,20 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Get the migration connection name.
-     */
+     # Get the migration connection name.
     public function getConnection(): ?string
     {
         return config('telescope.storage.database.connection');
     }
+     # Run the migrations.
 
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        $schema = Schema::connection($this->getConnection());
+        $connection = $this->getConnection();
+
+        if (config("database.connections.{$connection}.driver") === 'mongodb') {
+            return;
+        }
+
+        $schema = Schema::connection($connection);
 
         $schema->create('telescope_entries', function (Blueprint $table) {
             $table->bigIncrements('sequence');
@@ -56,12 +58,18 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+
+     # Reverse the migrations.
+
     public function down(): void
     {
-        $schema = Schema::connection($this->getConnection());
+        $connection = $this->getConnection();
+
+        if (config("database.connections.{$connection}.driver") === 'mongodb') {
+            return;
+        }
+
+        $schema = Schema::connection($connection);
 
         $schema->dropIfExists('telescope_entries_tags');
         $schema->dropIfExists('telescope_entries');
