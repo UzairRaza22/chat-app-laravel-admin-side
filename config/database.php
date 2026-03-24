@@ -14,6 +14,17 @@ return [
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
         ],
 
+        /*
+         * Dedicated SQLite connection for Laravel Telescope.
+         * Telescope requires a SQL-style DB; this avoids needing MySQL when app uses MongoDB.
+         */
+        'telescope' => [
+            'driver' => 'sqlite',
+            'database' => database_path('telescope.sqlite'),
+            'prefix' => '',
+            'foreign_key_constraints' => true,
+        ],
+
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),

@@ -1,5 +1,13 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+| All admin operations are grouped here.
+| All routes have been consolidated into routes/admin.php
+*/
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,14 +23,6 @@ Route::get('/health', function () {
         ]
     ];
 });
-
-/*
-|--------------------------------------------------------------------------
-| Admin Routes
-|--------------------------------------------------------------------------
-| All admin operations are grouped here.
-| All routes have been consolidated into routes/admin.php
-*/
 
 Route::prefix('admin')->group(function () {
     // All admin routes are now in routes/admin.php

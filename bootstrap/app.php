@@ -4,17 +4,72 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         App\Providers\ResponseServiceProvider::class,
+        App\Providers\TelescopeServiceProvider::class,
     ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            # API Routes Group with Throttling (30 requests per minute)
+            Route::middleware(['api', 'throttle:30,1'])
+                ->prefix('api')
+                ->name('api.')
+                ->group(function () {
+                    // Health check endpoint
+                    Route::get('/health', function () {
+                        return response()->success('Health check passed', [
+                            'status' => 'ok',
+                            'timestamp' => now()->toISOString(),
+                            'version' => '1.0.0',
+                            'service' => 'Whistle IT API'
+                        ]);
+                    });
+
+                    # Public Authentication Routes (No Auth Required)
+                    Route::prefix('admin')
+                        ->name('admin.')
+                        ->group(function () {
+                            require base_path('routes/admin/auth.php');
+                        });
+
+                    # Protected Admin Routes with Authentication
+                    Route::middleware(['check.admin.auth', 'check.admin.read.validation'])
+                        ->prefix('admin')
+                        ->name('admin.')
+                        ->group(function () {
+                            Route::prefix('workspaces')->name('workspaces.')->group(function () {
+                                require base_path('routes/admin/workspaces.php');
+                            });
+
+                            Route::prefix('teams')->name('teams.')->group(function () {
+                                require base_path('routes/admin/teams.php');
+                            });
+
+                            Route::prefix('channels')->name('channels.')->group(function () {
+                                require base_path('routes/admin/channels.php');
+                            });
+
+                            Route::prefix('messages')->name('messages.')->group(function () {
+                                require base_path('routes/admin/messages.php');
+                            });
+
+                            Route::prefix('users')->name('users.')->group(function () {
+                                require base_path('routes/admin/users.php');
+                            });
+
+                            Route::prefix('impersonate')->name('impersonate.')->group(function () {
+                                require base_path('routes/admin/impersonate.php');
+                            });
+                        });
+                });
+        },
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
@@ -28,112 +83,46 @@ return Application::configure(basePath: dirname(__DIR__))
             'check.admin.active' => \App\Http\Middleware\AdminAuth\CheckAdminActiveMiddleware::class,
             'check.admin.exists.forgot' => \App\Http\Middleware\AdminAuth\CheckAdminExistForForgotMiddleware::class,
 
-        
-            // Admin read operations middleware - uses admin login token for authentication
             'check.admin.auth' => \App\Http\Middleware\AdminAuth\CheckAdminTokenMiddleware::class . ':admin_login_token',
 
-            // Admin resource existence validation middleware
-            // (Replaced by check.admin.read.validation)
+            // User impersonation middleware - validates impersonation token
+            'impersonate.user' => \App\Http\Middleware\ValidateUserImpersonationToken::class,
+
+        ]);
+
+        $middleware->group('admin.api', [
+            'check.admin.auth',
+            'check.admin.read.validation',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Global Exception Handling for API Routes
-        $exceptions->render(function (Throwable $e, Request $request) {
-            // Only handle API requests and JSON requests
-            if ($request->is('api/*') || $request->expectsJson()) {
+        // Throttle exception handler (429 Too Many Requests)
+        $exceptions->render(function (\Illuminate\Http\Exceptions\ThrottleRequestsException $e, Request $request) {
+            if ($request->is('api/*')) {
+                $retryAfter = $e->getHeaders()['Retry-After'] ?? 60;
+                return response()->json([
+                    'message' => 'Too many requests. Please try again in ' . $retryAfter . ' seconds.',
+                    'status' => 429,
+                    'retry_after' => $retryAfter
+                ], 429);
+            }
+        });
 
-                // Handle HttpResponseException (thrown by middleware/requests)
+        // Delegate exception handling to response macros
+        $exceptions->render(function (Throwable $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                // HttpResponseException
                 if ($e instanceof \Illuminate\Http\Exceptions\HttpResponseException) {
                     return $e->getResponse();
                 }
 
-                // Handle Validation Exceptions
+                // Validation Exceptions - use response macro
                 if ($e instanceof \Illuminate\Validation\ValidationException) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Validation failed',
-                        'errors' => $e->errors(),
-                    ], 422);
+                    return response()->validationError('Validation failed', $e->errors());
                 }
 
-                // Handle Authentication Exceptions
-                if ($e instanceof \Illuminate\Auth\AuthenticationException) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Authentication required',
-                    ], 401);
-                }
-
-                // Handle Authorization Exceptions
-                if ($e instanceof \Illuminate\Auth\Access\AuthorizationException) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Access forbidden',
-                    ], 403);
-                }
-
-                // Handle Model Not Found Exceptions
-                if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
-                    $model = class_basename($e->getModel());
-                    return response()->json([
-                        'success' => false,
-                        'message' => "{$model} not found",
-                    ], 404);
-                }
-
-                // Handle Not Found HTTP Exceptions
-                if ($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Endpoint not found',
-                    ], 404);
-                }
-
-                // Handle Method Not Allowed Exceptions
-                if ($e instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Method not allowed',
-                    ], 405);
-                }
-
-                // Handle HTTP Exceptions
-                if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => $e->getMessage() ?: 'HTTP Error',
-                    ], $e->getStatusCode());
-                }
-
-                // Handle Database Exceptions
-                if ($e instanceof \Illuminate\Database\QueryException) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Database operation failed',
-                    ], 500);
-                }
-
-                // Handle General Exceptions
-                if (config('app.debug')) {
-                    // In debug mode, show detailed error information
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Server Error',
-                        'error' => $e->getMessage(),
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine(),
-                        'trace' => $e->getTraceAsString(),
-                    ], 500);
-                }
-
-                // In production, show generic error message
-                return response()->json([
-                    'success' => false,
-                    'message' => 'An unexpected error occurred',
-                ], 500);
+              
             }
-
-            // For non-API requests, return null to use default Laravel handling
             return null;
         });
     })->create();

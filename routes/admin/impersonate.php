@@ -3,17 +3,16 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminImpersonateController;
 
-// Admin Start Impersonation (requires user validation)
-Route::middleware([
-    'check.admin.auth',
-    'check.admin.read.validation:impersonate_read_request'
-])->group(function () {
-    Route::get('/read', [AdminImpersonateController::class, 'read']);
-});
+/**
+ * Admin Impersonation Routes
+ *
+ * These routes allow admins to generate impersonation tokens for users
+ * Frontend can then use these tokens to access data as that user
+ */
 
-# Admin Stop Impersonation
-Route::middleware([
-    'check.admin.auth'                  
-])->group(function () {
-    Route::post('/stop', [AdminImpersonateController::class, 'stop']);
-});
+// Generate impersonation token for a user
+Route::get('/read', [AdminImpersonateController::class, 'generateToken']);
+
+// Stop impersonation
+Route::post('/stop', [AdminImpersonateController::class, 'stopImpersonation']);
+
