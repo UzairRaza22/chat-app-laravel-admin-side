@@ -44,17 +44,6 @@ Route::prefix('auth')->group(function () {
     Route::post('/logout', [AdminAuthController::class, 'logout'])->middleware([
         'check.admin.token:admin_login_token',
     ]);
-
-<<<<<<< HEAD
-    // Test token endpoint for debugging
-    Route::get('/test-token', function () {
-        return response()->success('Token is valid!', [
-            'admin' => request()->user(),
-            'timestamp' => now()->toISOString()
-        ]);
-    })->middleware([
-        'check.admin.auth',
-    ]);
 });
 
 // Admin Channels routes
@@ -114,7 +103,4 @@ Route::prefix('workspaces')->middleware([
 ])->group(function () {
     Route::get('/read', [AdminWorkspaceController::class, 'read']);
 });
-=======
-   
-});
->>>>>>> 1e22a74da2f0cd66a8bff8bff9c5e66357fb11ee
+
