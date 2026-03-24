@@ -21,64 +21,10 @@ Route::get('/health', function () {
 | Admin Routes
 |--------------------------------------------------------------------------
 | All admin operations are grouped here.
-| Each module is separated into its own route file.
+| All routes have been consolidated into routes/admin.php
 */
 
 Route::prefix('admin')->group(function () {
-    // Admin authentication routes
+    // All admin routes are now in routes/admin.php
     require base_path('routes/admin.php');
-
-    /*
-    |--------------------------------------------------------------------------
-    | Workspaces
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('workspaces')->group(function () {
-        require base_path('routes/admin/workspaces.php');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Teams
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('teams')->group(function () {
-        require base_path('routes/admin/teams.php');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Channels
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('channels')->group(function () {
-        require base_path('routes/admin/channels.php');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Messages
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('messages')->group(function () {
-        require base_path('routes/admin/messages.php');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Users
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('users')->group(function () {
-        require base_path('routes/admin/users.php');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Impersonation
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('impersonate')->group(function () {
-        require base_path('routes/admin/impersonate.php');
-    });
 });
