@@ -45,6 +45,26 @@ class Workspace extends Model
         return $this->hasMany(Team::class, 'workspace_id', '_id');
     }
 
+    public static function addFilters($request, $query, bool $allowStatus = false)
+    {
+        if ($id = data_get($request, 'workspace_id')) {
+            $query->where('_id', $id);
+        }
+
+        if ($search = data_get($request, 'search')) {
+            $searchTerm = trim($search);
+            $safeSearch = preg_quote($searchTerm);
+            $query->where(function ($q) use ($safeSearch) {
+                $q->where('name', 'regex', "/{$safeSearch}/i")
+                    ->orWhere('description', 'regex', "/{$safeSearch}/i");
+            });
+        }
+
+        $sortBy = data_get($request, 'sort_by', 'created_at');
+        $sortOrder = data_get($request, 'sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+    }
+
     public static function edit($request)
     {
         $workspace = data_get($request, 'workspace');

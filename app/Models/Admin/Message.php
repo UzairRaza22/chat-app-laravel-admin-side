@@ -40,6 +40,34 @@ class Message extends Model
         ];
     }
 
+    public static function addFilters($request, $query, bool $allowStatus = false)
+    {
+        if ($id = data_get($request, 'message_id')) {
+            $query->where('_id', $id);
+        }
+        
+        if ($channelId = data_get($request, 'channel_id')) {
+            $query->where('channel_id', $channelId);
+        }
+
+        if ($userId = data_get($request, 'user_id')) {
+            $query->where('user_id', $userId);
+        }
+
+        if ($search = data_get($request, 'search')) {
+            $searchTerm = trim($search);
+            $safeSearch = preg_quote($searchTerm);
+            $query->where(function ($q) use ($safeSearch) {
+                $q->where('content', 'regex', "/{$safeSearch}/i")
+                    ->orWhere('file_name', 'regex', "/{$safeSearch}/i");
+            });
+        }
+
+        $sortBy = data_get($request, 'sort_by', 'created_at');
+        $sortOrder = data_get($request, 'sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+    }
+
     public static function add($data)
     {
         return self::create([

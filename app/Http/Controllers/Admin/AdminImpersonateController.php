@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\ImpersonateReadRequest;
+use Illuminate\Http\Request;
 use App\Http\Resources\admin\AdminUserResource;
 use App\Http\Resources\admin\AdminWorkspaceResource;
 use App\Http\Resources\admin\AdminTeamResource;
@@ -13,27 +13,23 @@ use App\Models\Admin\Workspace;
 use App\Models\Admin\Team;
 use App\Models\Admin\Channel;
 use App\Models\Admin\Message;
+use App\Models\Admin\User;
 
 class AdminImpersonateController extends Controller
 {
-    public function read(ImpersonateReadRequest $request)
+    public function read(Request $request)
     {
-        $user = data_get($request, 'validatedUser');
-
-        // Get all related data for the user
-        $relatedData = $this->readUserRelatedData($user);
+        $userId = data_get($request, 'user_id');
+        $query = User::where('_id', $userId);
         
-        return response()->success(
-            'User impersonation data with related information retrieved successfully!',
-            [
-                'user' => AdminUserResource::make($user),
-                'workspaces' => $relatedData['workspaces'],
-                'teams' => $relatedData['teams'],
-                'channels' => $relatedData['channels'],
-                'messages' => $relatedData['messages'],
-                'statistics' => $relatedData['statistics']
-            ]
-        );
+        $user = $query->first();
+
+        $data = $user ? array_merge(
+            ['user' => AdminUserResource::make($user)],
+            $this->readUserRelatedData($user)
+        ) : [];
+
+        return response()->success('User impersonation data retrieved successfully!', $data);
     }
 
     private function readUserRelatedData($user)

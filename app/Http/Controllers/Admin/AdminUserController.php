@@ -3,16 +3,29 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\UserReadRequest;
+use Illuminate\Http\Request;
+use App\Models\Admin\User;
 use App\Http\Resources\admin\AdminUserResource;
-use App\Http\Resources\admin\AdminUserCollection;
 
 class AdminUserController extends Controller
 {
-    public function read(UserReadRequest $request)
+    public function read(Request $request)
     {
-        return $request->input('user_id')
-            ? new AdminUserResource(data_get($request->attributes->all(), 'user'))
-            : new AdminUserCollection(data_get($request->attributes->all(), 'users'));
+        $query = User::query();
+
+        User::addFilters($request, $query, true);
+
+        $perPage = data_get($request, 'per_page', 10);
+        $users = $query->paginate($perPage);
+
+        return response()->success([
+            'users' => AdminUserResource::collection($users),
+            'pagination' => [
+                'total' => $users->total(),
+                'per_page' => $users->perPage(),
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+            ]
+        ]);
     }
 }
