@@ -46,7 +46,7 @@
     <h3>Welcome to Chat App</h3>
     <p>Your system health endpoint is available at:</p>
     <p>
-        <a href="https://www.google.com" target="_blank">Check Health</a>
+        <a href="http://178.104.58.236:81/api/health" target="_blank">Check Health</a>
     </p>
 </div>
 </body>
