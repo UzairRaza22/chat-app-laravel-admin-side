@@ -1,6 +1,5 @@
 <?php
 
-use DijDigital\TelescopeMongoDb\Watchers\BatchWatcher;
 use DijDigital\TelescopeMongoDb\Watchers\CacheWatcher;
 use DijDigital\TelescopeMongoDb\Watchers\ClientRequestWatcher;
 use DijDigital\TelescopeMongoDb\Watchers\CommandWatcher;
@@ -54,8 +53,6 @@ return [
     ],
 
     'watchers' => [
-        BatchWatcher::class => env('TELESCOPE_BATCH_WATCHER', true),
-
         CacheWatcher::class => [
             'enabled' => env('TELESCOPE_CACHE_WATCHER', true),
             'hidden' => [],
