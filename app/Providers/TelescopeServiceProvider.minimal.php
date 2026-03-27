@@ -14,21 +14,23 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     public function register(): void
     {
-        // Telescope::night();
+        // Only register if Telescope is enabled
+        if (!config('telescope.enabled')) {
+            return;
+        }
 
         $this->hideSensitiveRequestDetails();
 
-        // Record everything in production for debugging
+        // Simple filter for production
         Telescope::filter(function (IncomingEntry $entry) {
             if ($this->app->environment('local')) {
                 return true;
             }
 
+            // In production, only log important entries
             return $entry->isReportableException() ||
                    $entry->isFailedRequest() ||
-                   $entry->isFailedJob() ||
-                   $entry->isScheduledTask() ||
-                   $entry->hasMonitoredTag();
+                   $entry->isFailedJob();
         });
     }
 
@@ -42,44 +44,21 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
             'password',
             'password_confirmation',
             'token',
-            'admin_login_token',
-            'impersonation_token',
-            'admin_signup_verification_token',
-            'admin_forgot_password_token',
         ]);
 
         Telescope::hideRequestHeaders([
             'cookie',
-            'x-csrf-token',
-            'x-xsrf-token',
             'authorization',
-            'x-impersonation-token',
         ]);
     }
 
     /**
      * Register the Telescope gate.
-     *
-     * This gate determines who can access Telescope in non-local environments.
      */
     protected function gate(): void
     {
         Gate::define('viewTelescope', function ($user = null) {
-            // Allow access in local environment
-            if ($this->app->environment('local')) {
-                return true;
-            }
-
-            // In production, you can add your own authorization logic here
-            // For now, allowing all access for debugging purposes
-            // You should restrict this in production
-            return true;
-            
-            // Example: Only allow specific emails
-            // return in_array($user->email ?? '', [
-            //     'admin@test.com',
-            //     'your-email@domain.com',
-            // ]);
+            return true; // Open access for debugging
         });
     }
 }

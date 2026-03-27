@@ -19,7 +19,7 @@ use Laravel\Telescope\Watchers\ScheduleWatcher;
 use Laravel\Telescope\Watchers\ViewWatcher;
 
 return [
-    'enabled' => env('TELESCOPE_ENABLED', env('APP_DEBUG', false)),
+    'enabled' => env('TELESCOPE_ENABLED', false),
     'domain' => env('TELESCOPE_DOMAIN'),
     'path' => env('TELESCOPE_PATH', 'telescope'),
     'driver' => env('TELESCOPE_DRIVER', 'mongodb'),
@@ -48,8 +48,13 @@ return [
         'pulse*',
         '_boost*',
         '.well-known*',
-        'telescope*',
         'up',
+    ],
+
+    'ignore_commands' => [
+        'key:generate',
+        'package:discover',
+        'telescope:prune',
     ],
 
     'watchers' => [
@@ -66,7 +71,11 @@ return [
 
         CommandWatcher::class => [
             'enabled' => env('TELESCOPE_COMMAND_WATCHER', true),
-            'ignore' => [],
+            'ignore' => [
+                'key:generate',
+                'package:discover',
+                'telescope:prune',
+            ],
         ],
 
         DumpWatcher::class => [
@@ -112,7 +121,7 @@ return [
             'slow' => 100,
         ],
 
-        RedisWatcher::class => env('TELESCOPE_REDIS_WATCHER', true),
+        RedisWatcher::class => env('TELESCOPE_REDIS_WATCHER', false),
 
         RequestWatcher::class => [
             'enabled' => env('TELESCOPE_REQUEST_WATCHER', true),
