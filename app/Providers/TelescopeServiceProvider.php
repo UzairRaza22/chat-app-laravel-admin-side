@@ -16,13 +16,11 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     {
         $this->ensureTelescopeDatabaseExists();
 
-        if (!$this->app->environment('local')) {
-            Telescope::night();
-            return;
-        }
+        Telescope::night();
+
         $this->hideSensitiveRequestDetails();
 
-        # Record everything in local development
+        # Record everything in all environments
         Telescope::filter(function (IncomingEntry $entry) {
             return true;
         });
@@ -57,13 +55,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     protected function gate(): void
     {
         Gate::define('viewTelescope', function ($user = null) {
-            if ($this->app->environment('local')) {
-                return true;
-            }
-
-            return $user && in_array($user->email, [
-
-            ]);
+            return true;
         });
     }
 

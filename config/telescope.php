@@ -1,22 +1,22 @@
 <?php
 
-use DijDigital\TelescopeMongoDb\Watchers\CacheWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\ClientRequestWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\CommandWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\DumpWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\EventWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\ExceptionWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\GateWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\JobWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\LogWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\MailWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\ModelWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\NotificationWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\QueryWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\RedisWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\RequestWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\ScheduleWatcher;
-use DijDigital\TelescopeMongoDb\Watchers\ViewWatcher;
+use Laravel\Telescope\Watchers\CacheWatcher;
+use Laravel\Telescope\Watchers\ClientRequestWatcher;
+use Laravel\Telescope\Watchers\CommandWatcher;
+use Laravel\Telescope\Watchers\DumpWatcher;
+use Laravel\Telescope\Watchers\EventWatcher;
+use Laravel\Telescope\Watchers\ExceptionWatcher;
+use Laravel\Telescope\Watchers\GateWatcher;
+use Laravel\Telescope\Watchers\JobWatcher;
+use Laravel\Telescope\Watchers\LogWatcher;
+use Laravel\Telescope\Watchers\MailWatcher;
+use Laravel\Telescope\Watchers\ModelWatcher;
+use Laravel\Telescope\Watchers\NotificationWatcher;
+use Laravel\Telescope\Watchers\QueryWatcher;
+use Laravel\Telescope\Watchers\RedisWatcher;
+use Laravel\Telescope\Watchers\RequestWatcher;
+use Laravel\Telescope\Watchers\ScheduleWatcher;
+use Laravel\Telescope\Watchers\ViewWatcher;
 
 return [
     'enabled' => env('TELESCOPE_ENABLED', env('APP_DEBUG', false)),
@@ -39,7 +39,7 @@ return [
 
     'middleware' => [
         'web',
-        DijDigital\TelescopeMongoDb\Http\Middleware\Authorize::class,
+        Laravel\Telescope\Http\Middleware\Authorize::class,
     ],
 
     'ignore_paths' => [
